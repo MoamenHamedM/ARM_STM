@@ -36,7 +36,7 @@
 /********************Macros for the GPIO pin modes********************/
 #define GPIO_MODE_IN_FL 0x00000000
 #define GPIO_MODE_IN_PU 0x00000008
-#define GPIO_MODE_IN_PD 0x00000018
+#define GPIO_MODE_IN_PD 0x00000010
 
 #define GPIO_MODE_OP_PP 0x00000001
 #define GPIO_MODE_OP_PP_PU 0x00000009
@@ -77,10 +77,11 @@ typedef struct
  * use this function to initialize a GPIO pin
  * parameters:
  * GPIO_Element -> the address of a struct of type GPIO_t
- * you should configure the Pin, Port, Speed, Mode parameters in
- * the struct
+ * you should configure the Pin, Port, Speed, Mode parameters in the struct
+ * return:
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
  */
-void GPIO_Init(GPIO_Pin_t *GPIO_Element);
+Error_Status GPIO_Init(GPIO_Pin_t *GPIO_Element);
 
 /*
  * use this function to set a value to a GPIO pin
@@ -88,15 +89,20 @@ void GPIO_Init(GPIO_Pin_t *GPIO_Element);
  * GPIO_Port -> GPIO_PORT_A, GPIO_PORT_B, GPIO_PORT_C
  * GPIO_Pin -> GPIO_PIN_0 : GPIO_PIN_15
  * GPIO_State -> GPIO_STATE_RESET, GPIO_STATE_SET
+ * return:
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
  */
-void GPIO_Set_PinValue(void *GPIO_Port, u32_t GPIO_Pin, u32_t GPIO_State);
+Error_Status GPIO_Set_PinValue(void *GPIO_Port, u32_t GPIO_Pin, u32_t GPIO_State);
 
 /*
  * use this function to get a value from a GPIO pin
  * parameters:
  * GPIO_Port -> GPIO_PORT_A, GPIO_PORT_B, GPIO_PORT_C
  * GPIO_Pin -> GPIO_PIN_0 : GPIO_PIN_15
+ * GPIO_Pin_State -> address of the var to hold the state -> GPIO_STATE_RESET, GPIO_STATE_SET
+ * return:
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
  */
-u8_t GPIO_Get_PinValue(void *GPIO_Port, u32_t GPIO_Pin);
+Error_Status GPIO_Get_PinValue(void *GPIO_Port, u32_t GPIO_Pin, u8_t *GPIO_Pin_State);
 
 #endif /* GPIO_DRIVER_H_ */

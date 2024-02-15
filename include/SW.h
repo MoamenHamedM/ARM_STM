@@ -8,9 +8,9 @@
 
 #define SW_PULL_UP 0x00000008
 #define SW_PULL_DOWN 0x00000018
-#define SW_STATE_PRESSED 1
-#define SW_STATE_NOT_PRESSED 0
-#define SW_4BIT_OFFSET 4
+#define SW_STATE_PRESSED 0x00000001
+#define SW_STATE_NOT_PRESSED 0x00000000
+#define SW_4BIT_OFFSET 0x00000004
 
 typedef struct
 {
@@ -21,16 +21,19 @@ typedef struct
 
 /*
  * use this function to initialize all the switches you configured
+ * return:
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
  */
-void SW_Init();
+Error_Status SW_Init();
 
 /*
  * use this function to get the state of a switch
  * Parameters:
- * SW -> the name of the desired led
- * Return:
- * SW_STATE_PRESSED, SW_STATE_NOT_PRESSED
+ * SW -> the name of the desired switch
+ * SW_State -> address of the var to hold the state -> SW_STATE_PRESSED, SW_STATE_NOT_PRESSED
+ * return:
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
  */
-u8_t SW_GetState(u32_t Switch);
+Error_Status SW_GetState(u32_t Switch, u8_t *SW_State);
 
 #endif

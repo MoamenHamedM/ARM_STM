@@ -1,10 +1,13 @@
 
 #include "RCC_DRIVER.h"
 #include "GPIO_DRIVER.h"
+#include "LED.h"
+#include "SW.h"
 
 #define TEST_RCC 0
 #define TEST_GPIO 1
-#define APP TEST_GPIO
+#define TEST_LED_SW 2
+#define APP TEST_LED_SW
 
 // ----- main() ---------------------------------------------------------------
 
@@ -62,11 +65,44 @@ int main(int argc, char *argv[])
 
 #endif
 
+#if APP == TEST_LED_SW
+
+  u8_t flag = 0;
+  u8_t SW_State = SW_STATE_NOT_PRESSED;
+
+  RCC_CTRL_AHB1_PeriEnable(AHB1_PERI_GPIOA);
+  RCC_CTRL_AHB1_PeriEnable(AHB1_PERI_GPIOB);
+
+  LED_Init();
+  SW_Init();
+
   // Infinite loop
   while (1)
   {
-    // Add your code here.
+    while (SW_State == SW_STATE_NOT_PRESSED)
+    {
+      SW_GetState(SW_ON, &SW_State);
+    }
+
+    if (flag == 0)
+    {
+      LED_SetState(LED_Alarm, LED_STATE_ON);
+      flag = 1;
+    }
+    else if (flag == 1)
+    {
+      LED_SetState(LED_Alarm, LED_STATE_OFF);
+      flag = 0;
+    }
+
+    while (SW_State == SW_STATE_PRESSED)
+    {
+      SW_GetState(SW_ON, &SW_State);
+    }
   }
+
+#endif
+
   return 0;
 }
 

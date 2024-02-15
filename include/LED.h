@@ -20,15 +20,19 @@ typedef struct
 
 /*
  * use this function to initialize all the leds you configured
+ * return:
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
  */
-void LED_Init();
+Error_Status LED_Init();
 
 /*
  * use this function to set the sate of a led
  * Parameters:
  * Led -> the name of the desired led
  * State -> LED_STATE_ON, LED_STATE_OFF
+ * return:
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
  */
-void LED_SetState(u32_t Led, u8_t State);
+Error_Status LED_SetState(u32_t Led, u8_t State);
 
 #endif

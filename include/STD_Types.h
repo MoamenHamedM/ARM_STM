@@ -8,6 +8,16 @@
 #ifndef STD_TYPES_H_
 #define STD_TYPES_H_
 
+#define NULL ((void*)0)
+
+typedef enum
+{
+    Status_NOK,
+    Status_OK,
+    Status_Null_Pointer,
+    Status_Invalid_Input
+} Error_Status;
+
 typedef signed char s8_t;
 typedef unsigned char u8_t;
 typedef signed short int s16_t;
