@@ -1,0 +1,13 @@
+{
+  "folders": [],
+  "settings": {
+    "files.associations": {
+      "rcc_driver.h": "c",
+      "gpio_driver.h": "c"
+    },
+    "C_Cpp.default.includePath": [
+      "E:\\ITI\\ARM\\ARM_WorkSpace\\ARM_STM\\src\\inc"
+    ],
+    "C_Cpp.default.compilerPath": ""
+  }
+}
