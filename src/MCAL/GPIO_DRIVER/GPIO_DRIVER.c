@@ -38,6 +38,14 @@ Error_Status GPIO_Init(GPIO_Pin_t *GPIO_Element)
   {
     LOC_Status = Status_Null_Pointer;
   }
+  else if ((GPIO_Element->Mode > GPIO_MODE_AF_OD_PD) || (GPIO_Element->Pin > GPIO_PIN_15))
+  {
+    LOC_Status = Status_Invalid_Input;
+  }
+  else if ((GPIO_Element->Port > GPIO_PORT_C) || (GPIO_Element->Speed > GPIO_SPEED_VHIGH))
+  {
+    LOC_Status = Status_Invalid_Input;
+  }
   else
   {
     LOC_Status = Status_OK;
