@@ -78,9 +78,9 @@ Error_Status RCC_CTRL_ClockOFF(u32_t Clock)
   return LOC_Result;
 }
 
-u32_t RCC_Read_ClockStatus(u32_t Clock)
+Error_Status RCC_Read_ClockStatus(u32_t Clock)
 {
-  u32_t LOC_Result = Status_NOK;
+  Error_Status LOC_Result = Status_NOK;
 
   if (Clock > CLOCK_PLL_STATUS)
   {
@@ -151,6 +151,10 @@ Error_Status RCC_CFG_PLLClock(u32_t PLL_N, u32_t PLL_M, u32_t PLL_P, u32_t PLL_Q
   else if (PLL_Q > 15 || PLL_Q < 2)
   {
     LOC_Result = Status_Invalid_Input;
+  }
+  else if ((RCC->CR & (CLOCK_PLL_STATUS)) == Status_OK)
+  {
+    LOC_Result = Status_NOK;
   }
   else
   {

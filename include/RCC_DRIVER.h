@@ -103,8 +103,10 @@ Error_Status RCC_CTRL_ClockOFF(u32_t Clock);
  * Function to check if any clock in the system is ready or not
  * parameters:
  * Clock  -> CLOCK_HSI_STATUS, CLOCK_HSE_STATUS, CLOCK_PLL_STATUS
+ * return:
+ * Status_NOK, Status_OK
  */
-u32_t RCC_Read_ClockStatus(u32_t Clock);
+Error_Status RCC_Read_ClockStatus(u32_t Clock);
 
 /*
  * Function to select a clock in the system to be the system clock
