@@ -64,6 +64,24 @@
 #define GPIO_STATE_RESET 0x00000000
 #define GPIO_STATE_SET 0x00000001
 
+/********************Macros for the GPIO pin alternate functions********************/
+#define GPIO_FUNC_AF0 0x00000000
+#define GPIO_FUNC_AF1 0x00000001
+#define GPIO_FUNC_AF2 0x00000002
+#define GPIO_FUNC_AF3 0x00000003
+#define GPIO_FUNC_AF4 0x00000004
+#define GPIO_FUNC_AF5 0x00000005
+#define GPIO_FUNC_AF6 0x00000006
+#define GPIO_FUNC_AF7 0x00000007
+#define GPIO_FUNC_AF8 0x00000008
+#define GPIO_FUNC_AF9 0x00000009
+#define GPIO_FUNC_AF10 0x0000000A
+#define GPIO_FUNC_AF11 0x0000000B
+#define GPIO_FUNC_AF12 0x0000000C
+#define GPIO_FUNC_AF13 0x0000000D
+#define GPIO_FUNC_AF14 0x0000000E
+#define GPIO_FUNC_AF15 0x0000000F
+
 /********************struct to create an object of a GPIO pin********************/
 typedef struct
 {
@@ -104,5 +122,16 @@ Error_Status GPIO_Set_PinValue(void *GPIO_Port, u32_t GPIO_Pin, u32_t GPIO_State
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
  */
 Error_Status GPIO_Get_PinValue(void *GPIO_Port, u32_t GPIO_Pin, u8_t *GPIO_Pin_State);
+
+/*
+ * use this function to configure an alternate function of a GPIO pin
+ * parameters:
+ * GPIO_Port -> GPIO_PORT_A, GPIO_PORT_B, GPIO_PORT_C
+ * GPIO_Pin -> GPIO_PIN_0 : GPIO_PIN_15
+ * GPIO_Func -> GPIO_FUNC_AF0 : GPIO_FUNC_AF15
+ * return:
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
+ */
+Error_Status GPIO_CFG_AlternateFunction(void *GPIO_Port, u32_t GPIO_Pin, u32_t GPIO_Func);
 
 #endif /* GPIO_DRIVER_H_ */

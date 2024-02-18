@@ -14,8 +14,10 @@
 #define GPIO_TYPE_SHIFT 0x00000002
 #define GPIO_UP_DN_SHIFT 0x00000003
 #define GPIO_REG_SIZE 0x00000010
+#define GPIO_AFR_CLEAR_MASK 0x0000000F
 #define GPIO_1BIT_OFFSET 0x00000001
 #define GPIO_2BIT_OFFSET 0x00000002
+#define GPIO_4BIT_OFFSET 0x00000004
 
 typedef struct
 {
@@ -125,5 +127,40 @@ Error_Status GPIO_Get_PinValue(void *GPIO_Port, u32_t GPIO_Pin, u8_t *GPIO_Pin_S
     *GPIO_Pin_State = (((GPIO_Port_t *)GPIO_Port)->IDR >> GPIO_Pin) & 1;
   }
 
+  return LOC_Status;
+}
+
+Error_Status GPIO_CFG_AlternateFunction(void *GPIO_Port, u32_t GPIO_Pin, u32_t GPIO_Func)
+{
+  Error_Status LOC_Status = Status_NOK;
+
+  if (GPIO_Port == NULL)
+  {
+    LOC_Status = Status_Null_Pointer;
+  }
+  else if (GPIO_Pin > GPIO_PIN_15 || GPIO_Func > GPIO_FUNC_AF15)
+  {
+    LOC_Status = Status_Invalid_Input;
+  }
+  else
+  {
+    LOC_Status = Status_OK;
+    u32_t LOC_AFR_Value = 0;
+
+    if (GPIO_Pin > GPIO_PIN_7)
+    {
+      LOC_AFR_Value = (((GPIO_Port_t *)GPIO_Port)->AFRH);
+      LOC_AFR_Value &= ~(GPIO_AFR_CLEAR_MASK << (GPIO_Pin * GPIO_4BIT_OFFSET));
+      LOC_AFR_Value |= (GPIO_Func << (GPIO_Pin * GPIO_4BIT_OFFSET));
+      (((GPIO_Port_t *)GPIO_Port)->AFRH) = LOC_AFR_Value;
+    }
+    else
+    {
+      LOC_AFR_Value = (((GPIO_Port_t *)GPIO_Port)->AFRL);
+      LOC_AFR_Value &= ~(GPIO_AFR_CLEAR_MASK << (GPIO_Pin * GPIO_4BIT_OFFSET));
+      LOC_AFR_Value |= (GPIO_Func << (GPIO_Pin * GPIO_4BIT_OFFSET));
+      (((GPIO_Port_t *)GPIO_Port)->AFRL) = LOC_AFR_Value;
+    }
+  }
   return LOC_Status;
 }
