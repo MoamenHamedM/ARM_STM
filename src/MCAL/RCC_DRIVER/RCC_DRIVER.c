@@ -20,6 +20,11 @@
 #define PLL_N_OFFSET 0x00000006
 #define PLL_P_OFFSET 0x00000010
 #define PLL_Q_OFFSET 0x00000018
+#define RCC_PERI_MASK 0x03000000
+#define RCC_REG_AHB1_MASK 0x00000000
+#define RCC_REG_AHB2_MASK 0x01000000
+#define RCC_REG_APB1_MASK 0x02000000
+#define RCC_REG_APB2_MASK 0x03000000
 
 typedef struct
 {
@@ -45,8 +50,16 @@ typedef struct
 
 RCC_PERI_t *const RCC = (RCC_PERI_t *)RCC_BASE_ADDRESS;
 
-Error_Status
-RCC_CTRL_ClockON(u32_t Clock)
+static Error_Status RCC_CTRL_AHB1_PeriEnable(u32_t AHB1_Peri);
+static Error_Status RCC_CTRL_AHB1_PeriDisable(u32_t AHB1_Peri);
+static Error_Status RCC_CTRL_AHB2_PeriEnable(u32_t AHB2_Peri);
+static Error_Status RCC_CTRL_AHB2_PeriDisable(u32_t AHB2_Peri);
+static Error_Status RCC_CTRL_APB1_PeriEnable(u32_t APB1_Peri);
+static Error_Status RCC_CTRL_APB1_PeriDisable(u32_t APB1_Peri);
+static Error_Status RCC_CTRL_APB2_PeriEnable(u32_t APB2_Peri);
+static Error_Status RCC_CTRL_APB2_PeriDisable(u32_t APB2_Peri);
+
+Error_Status RCC_CTRL_ClockON(u32_t Clock)
 {
   Error_Status LOC_Result = Status_NOK;
 
@@ -171,11 +184,69 @@ Error_Status RCC_CFG_PLLClock(u32_t PLL_N, u32_t PLL_M, u32_t PLL_P, u32_t PLL_Q
   return LOC_Result;
 }
 
-Error_Status RCC_CTRL_AHB1_PeriEnable(u32_t AHB1_Peri)
+Error_Status RCC_CTRL_Peripheral_Enable(u32_t RCC_Peri)
+{
+  Error_Status LOC_Result = Status_NOK;
+  u32_t LOC_PeriSelect = RCC_Peri & RCC_PERI_MASK;
+
+  switch (LOC_PeriSelect)
+  {
+  case RCC_REG_AHB1_MASK:
+    LOC_Result = RCC_CTRL_AHB1_PeriEnable(RCC_Peri);
+    break;
+  case RCC_REG_AHB2_MASK:
+    RCC_Peri &= ~RCC_PERI_MASK;
+    LOC_Result = RCC_CTRL_AHB2_PeriEnable(RCC_Peri);
+    break;
+  case RCC_REG_APB1_MASK:
+    RCC_Peri &= ~RCC_PERI_MASK;
+    LOC_Result = RCC_CTRL_APB1_PeriEnable(RCC_Peri);
+    break;
+  case RCC_REG_APB2_MASK:
+    RCC_Peri &= ~RCC_PERI_MASK;
+    LOC_Result = RCC_CTRL_APB2_PeriEnable(RCC_Peri);
+    break;
+  default:
+    /*Do Nothing*/
+    break;
+  }
+  return LOC_Result;
+}
+
+Error_Status RCC_CTRL_Peripheral_Disable(u32_t RCC_Peri)
+{
+  Error_Status LOC_Result = Status_NOK;
+  u32_t LOC_PeriSelect = RCC_Peri & RCC_PERI_MASK;
+
+  switch (LOC_PeriSelect)
+  {
+  case RCC_REG_AHB1_MASK:
+    LOC_Result = RCC_CTRL_AHB1_PeriDisable(RCC_Peri);
+    break;
+  case RCC_REG_AHB2_MASK:
+    RCC_Peri &= ~RCC_PERI_MASK;
+    LOC_Result = RCC_CTRL_AHB2_PeriDisable(RCC_Peri);
+    break;
+  case RCC_REG_APB1_MASK:
+    RCC_Peri &= ~RCC_PERI_MASK;
+    LOC_Result = RCC_CTRL_APB1_PeriDisable(RCC_Peri);
+    break;
+  case RCC_REG_APB2_MASK:
+    RCC_Peri &= ~RCC_PERI_MASK;
+    LOC_Result = RCC_CTRL_APB2_PeriDisable(RCC_Peri);
+    break;
+  default:
+    /*Do Nothing*/
+    break;
+  }
+  return LOC_Result;
+}
+
+static Error_Status RCC_CTRL_AHB1_PeriEnable(u32_t AHB1_Peri)
 {
   Error_Status LOC_Result = Status_NOK;
 
-  if (AHB1_Peri > AHB1_PERI_DMA2)
+  if (AHB1_Peri > RCC_PERI_AHB1_DMA2)
   {
     LOC_Result = Status_Invalid_Input;
   }
@@ -187,11 +258,11 @@ Error_Status RCC_CTRL_AHB1_PeriEnable(u32_t AHB1_Peri)
   return LOC_Result;
 }
 
-Error_Status RCC_CTRL_AHB1_PeriDisable(u32_t AHB1_Peri)
+static Error_Status RCC_CTRL_AHB1_PeriDisable(u32_t AHB1_Peri)
 {
   Error_Status LOC_Result = Status_NOK;
 
-  if (AHB1_Peri > AHB1_PERI_DMA2)
+  if (AHB1_Peri > RCC_PERI_AHB1_DMA2)
   {
     LOC_Result = Status_Invalid_Input;
   }
@@ -203,11 +274,11 @@ Error_Status RCC_CTRL_AHB1_PeriDisable(u32_t AHB1_Peri)
   return LOC_Result;
 }
 
-Error_Status RCC_CTRL_AHB2_PeriEnable(u32_t AHB2_Peri)
+static Error_Status RCC_CTRL_AHB2_PeriEnable(u32_t AHB2_Peri)
 {
   Error_Status LOC_Result = Status_NOK;
 
-  if (AHB2_Peri != AHB2_PERI_OTG)
+  if (AHB2_Peri != RCC_PERI_AHB2_OTG)
   {
     LOC_Result = Status_Invalid_Input;
   }
@@ -219,11 +290,11 @@ Error_Status RCC_CTRL_AHB2_PeriEnable(u32_t AHB2_Peri)
   return LOC_Result;
 }
 
-Error_Status RCC_CTRL_AHB2_PeriDisable(u32_t AHB2_Peri)
+static Error_Status RCC_CTRL_AHB2_PeriDisable(u32_t AHB2_Peri)
 {
   Error_Status LOC_Result = Status_NOK;
 
-  if (AHB2_Peri != AHB2_PERI_OTG)
+  if (AHB2_Peri != RCC_PERI_AHB2_OTG)
   {
     LOC_Result = Status_Invalid_Input;
   }
@@ -235,11 +306,11 @@ Error_Status RCC_CTRL_AHB2_PeriDisable(u32_t AHB2_Peri)
   return LOC_Result;
 }
 
-Error_Status RCC_CTRL_APB1_PeriEnable(u32_t APB1_Peri)
+static Error_Status RCC_CTRL_APB1_PeriEnable(u32_t APB1_Peri)
 {
   Error_Status LOC_Result = Status_NOK;
 
-  if (APB1_Peri > APB1_PERI_PWR)
+  if (APB1_Peri > RCC_PERI_APB1_PWR)
   {
     LOC_Result = Status_Invalid_Input;
   }
@@ -251,11 +322,11 @@ Error_Status RCC_CTRL_APB1_PeriEnable(u32_t APB1_Peri)
   return LOC_Result;
 }
 
-Error_Status RCC_CTRL_APB1_PeriDisable(u32_t APB1_Peri)
+static Error_Status RCC_CTRL_APB1_PeriDisable(u32_t APB1_Peri)
 {
   Error_Status LOC_Result = Status_NOK;
 
-  if (APB1_Peri > APB1_PERI_PWR)
+  if (APB1_Peri > RCC_PERI_APB1_PWR)
   {
     LOC_Result = Status_Invalid_Input;
   }
@@ -267,11 +338,11 @@ Error_Status RCC_CTRL_APB1_PeriDisable(u32_t APB1_Peri)
   return LOC_Result;
 }
 
-Error_Status RCC_CTRL_APB2_PeriEnable(u32_t APB2_Peri)
+static Error_Status RCC_CTRL_APB2_PeriEnable(u32_t APB2_Peri)
 {
   Error_Status LOC_Result = Status_NOK;
 
-  if (APB2_Peri > APB2_PERI_TIM11)
+  if (APB2_Peri > RCC_PERI_APB2_TIM11)
   {
     LOC_Result = Status_Invalid_Input;
   }
@@ -283,11 +354,11 @@ Error_Status RCC_CTRL_APB2_PeriEnable(u32_t APB2_Peri)
   return LOC_Result;
 }
 
-Error_Status RCC_CTRL_APB2_PeriDisable(u32_t APB2_Peri)
+static Error_Status RCC_CTRL_APB2_PeriDisable(u32_t APB2_Peri)
 {
   Error_Status LOC_Result = Status_NOK;
 
-  if (APB2_Peri > APB2_PERI_TIM11)
+  if (APB2_Peri > RCC_PERI_APB2_TIM11)
   {
     LOC_Result = Status_Invalid_Input;
   }

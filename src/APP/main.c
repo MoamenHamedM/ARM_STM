@@ -38,8 +38,8 @@ int main(int argc, char *argv[])
   }
   RCC_SEL_SystemCLK(SYS_ClOCK_PLL);
 
-  RCC_CTRL_AHB1_PeriEnable(AHB1_PERI_DMA1);
-  RCC_CTRL_AHB1_PeriDisable(AHB1_PERI_DMA1);
+  RCC_CTRL_Peripheral_Enable(RCC_PERI_AHB1_DMA1);
+  RCC_CTRL_Peripheral_Disable(RCC_PERI_AHB1_DMA1);
 
   RCC_CFG_AHP_Prescaler(AHP_PRE_2);
   RCC_CFG_APB_HighSpeed_Prescaler(APB_PRE_2);
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
 #if APP == TEST_GPIO
 
-  RCC_CTRL_AHB1_PeriEnable(AHB1_PERI_GPIOA);
+  RCC_CTRL_Peripheral_Enable(RCC_PERI_AHB1_GPIOA);
 
   GPIO_Pin_t Led = {.Pin = GPIO_PIN_1, .Port = GPIO_PORT_A, .Mode = GPIO_MODE_OP_PP_PU, .Speed = GPIO_SPEED_MED};
   GPIO_Init(&Led);
@@ -70,8 +70,8 @@ int main(int argc, char *argv[])
   u8_t flag = 0;
   u8_t SW_State = SW_STATE_NOT_PRESSED;
 
-  RCC_CTRL_AHB1_PeriEnable(AHB1_PERI_GPIOA);
-  RCC_CTRL_AHB1_PeriEnable(AHB1_PERI_GPIOB);
+  RCC_CTRL_Peripheral_Enable(RCC_PERI_AHB1_GPIOA);
+  RCC_CTRL_Peripheral_Enable(RCC_PERI_AHB1_GPIOB);
 
   LED_Init();
   SW_Init();
