@@ -4,9 +4,6 @@
 #include "MCAL/GPIO_DRIVER.h"
 #include "MCAL/RCC_DRIVER.h"
 
-#define FIND_REG_MASK(x, minReg, maxReg, minMask, maxMask) \
-    (u32_t)((float)((x) - (minReg)) / ((maxReg) - (minReg)) * ((maxMask) - (minMask)) + (minMask))
-
 extern const LED_cfg_t Leds[_LED_Num];
 
 Error_Status LED_Init()

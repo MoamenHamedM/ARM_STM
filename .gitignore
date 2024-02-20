@@ -6,3 +6,12 @@
 test/GPIO_Test/test/test_GPIO_Test.c
 test/GPIO_Test/test/test_GPIO_Test.c.bak
 test/GPIO_Test/test/support/.gitkeep
+test/GPIO_Test/project.yml
+test/GPIO_Test/project.yml.bak
+test/GPIO_Test/build/test/cache/defines_dependency.yml
+test/GPIO_Test/build/test/cache/input.yml
+test/GPIO_Test/build/test/preprocess/includes/test_led.c
+test/GPIO_Test/inc/LED.h
+test/GPIO_Test/src/GPIO_Test.c
+test/GPIO_Test/src/GPIO_Test.h
+.gitignore

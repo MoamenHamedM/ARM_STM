@@ -88,6 +88,10 @@
 #define MIN_MASK_VALUE 0x00000001
 #define MAX_MASK_VALUE 0x00000004
 
+/********************function like macro to map the GPIO registers adresses to the masks********************/
+#define FIND_REG_MASK(x, minReg, maxReg, minMask, maxMask) \
+  (u32_t)((float)((x) - (minReg)) / ((maxReg) - (minReg)) * ((maxMask) - (minMask)) + (minMask))
+
 /********************struct to create an object of a GPIO pin********************/
 typedef struct
 {
