@@ -1,5 +1,6 @@
 {
   "files.associations": {
-    "rcc_driver.h": "c"
+    "rcc_driver.h": "c",
+    "led.h": "c"
   }
 }

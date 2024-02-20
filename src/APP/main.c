@@ -1,8 +1,8 @@
 
-#include "RCC_DRIVER.h"
-#include "GPIO_DRIVER.h"
-#include "LED.h"
-#include "SW.h"
+#include "MCAL/RCC_DRIVER.h"
+#include "MCAL/GPIO_DRIVER.h"
+#include "HAL/LED.h"
+#include "HAL/SW.h"
 
 #define TEST_RCC 0
 #define TEST_GPIO 1

@@ -1,7 +1,7 @@
 
 
-#include "GPIO_DRIVER.h"
-#include "LED.h"
+#include "MCAL/GPIO_DRIVER.h"
+#include "HAL/LED.h"
 
 const LED_cfg_t Leds[_LED_Num] =
     {

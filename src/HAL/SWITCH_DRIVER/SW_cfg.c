@@ -1,7 +1,6 @@
 
-
-#include "GPIO_DRIVER.h"
-#include "SW.h"
+#include "MCAL/GPIO_DRIVER.h"
+#include "HAL/SW.h"
 
 const SW_cfg_t Switches[_SW_Num] =
     {

@@ -1,7 +1,7 @@
 
 
-#include "SW.h"
-#include "GPIO_DRIVER.h"
+#include "HAL/SW.h"
+#include "MCAL/GPIO_DRIVER.h"
 
 extern const SW_cfg_t Switches[_SW_Num];
 
