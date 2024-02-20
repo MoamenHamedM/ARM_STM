@@ -68,10 +68,7 @@ int main(int argc, char *argv[])
 #if APP == TEST_LED_SW
 
   u8_t flag = 0;
-  u8_t SW_State = SW_STATE_NOT_PRESSED;
-
-  RCC_CTRL_Peripheral_Enable(RCC_PERI_AHB1_GPIOA);
-  RCC_CTRL_Peripheral_Enable(RCC_PERI_AHB1_GPIOB);
+  u8_t SW_State = 0;
 
   LED_Init();
   SW_Init();
@@ -79,11 +76,12 @@ int main(int argc, char *argv[])
   // Infinite loop
   while (1)
   {
+    SW_GetState(SW_ON, &SW_State);
+
     while (SW_State == SW_STATE_NOT_PRESSED)
     {
       SW_GetState(SW_ON, &SW_State);
     }
-
     if (flag == 0)
     {
       LED_SetState(LED_Alarm, LED_STATE_ON);

@@ -3,3 +3,6 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+test/GPIO_Test/test/test_GPIO_Test.c
+test/GPIO_Test/test/test_GPIO_Test.c.bak
+test/GPIO_Test/test/support/.gitkeep

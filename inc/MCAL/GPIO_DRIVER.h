@@ -82,6 +82,12 @@
 #define GPIO_FUNC_AF14 0x0000000E
 #define GPIO_FUNC_AF15 0x0000000F
 
+/********************Macros to map the GPIO registers adresses to the masks********************/
+#define MIN_REG_VALUE 0x40020000
+#define MAX_REG_VALUE 0x40020800
+#define MIN_MASK_VALUE 0x00000001
+#define MAX_MASK_VALUE 0x00000004
+
 /********************struct to create an object of a GPIO pin********************/
 typedef struct
 {
