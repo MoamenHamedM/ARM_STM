@@ -36,7 +36,7 @@ typedef struct
 Error_Status GPIO_Init(GPIO_Pin_t *GPIO_Element)
 {
   Error_Status LOC_Status = Status_NOK;
-  if (GPIO_Element == NULL)
+  if (GPIO_Element == NULL || (GPIO_Port_t *)GPIO_Element->Port == NULL)
   {
     LOC_Status = Status_Null_Pointer;
   }
