@@ -3,6 +3,7 @@
 #include "MCAL/GPIO_DRIVER.h"
 #include "HAL/LED.h"
 #include "HAL/SW.h"
+#include "HAL/CLOCK_HANDLER.h"
 
 #define TEST_RCC 0
 #define TEST_GPIO 1
@@ -69,6 +70,9 @@ int main(int argc, char *argv[])
 
   u8_t flag = 0;
   u8_t SW_State = 0;
+
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOB);
 
   LED_Init();
   SW_Init();
