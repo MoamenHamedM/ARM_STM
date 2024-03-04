@@ -53,7 +53,7 @@ Error_Status NVIC_CTRL_EnableIRQ(IRQ_ID_t NVIC_IQR)
     Error_Status LOC_Status = Status_NOK;
     u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
 
-    if (NVIC_IQR > _NVIC_IRQ_NUM)
+    if (NVIC_IQR >= _NVIC_IRQ_NUM)
     {
         LOC_Status = Status_Invalid_Input;
     }
@@ -70,7 +70,7 @@ Error_Status NVIC_CTRL_DisableIRQ(IRQ_ID_t NVIC_IQR)
     Error_Status LOC_Status = Status_NOK;
     u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
 
-    if (NVIC_IQR > _NVIC_IRQ_NUM)
+    if (NVIC_IQR >= _NVIC_IRQ_NUM)
     {
         LOC_Status = Status_Invalid_Input;
     }
@@ -87,7 +87,7 @@ Error_Status NVIC_CTRL_SetIRQPending(IRQ_ID_t NVIC_IQR)
     Error_Status LOC_Status = Status_NOK;
     u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
 
-    if (NVIC_IQR > _NVIC_IRQ_NUM)
+    if (NVIC_IQR >= _NVIC_IRQ_NUM)
     {
         LOC_Status = Status_Invalid_Input;
     }
@@ -104,7 +104,7 @@ Error_Status NVIC_CTRL_SetIRQPending(IRQ_ID_t NVIC_IQR)
     Error_Status LOC_Status = Status_NOK;
     u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
 
-    if (NVIC_IQR > _NVIC_IRQ_NUM)
+    if (NVIC_IQR >= _NVIC_IRQ_NUM)
     {
         LOC_Status = Status_Invalid_Input;
     }
@@ -120,7 +120,7 @@ Error_Status NVIC_CTRL_GenerateSWI(IRQ_ID_t NVIC_IQR)
 {
     Error_Status LOC_Status = Status_NOK;
 
-    if (NVIC_IQR > _NVIC_IRQ_NUM)
+    if (NVIC_IQR >= _NVIC_IRQ_NUM)
     {
         LOC_Status = Status_Invalid_Input;
     }
@@ -137,7 +137,7 @@ Error_Status NVIC_Get_ActiveStatus(IRQ_ID_t NVIC_IQR, u32_t *Status)
     Error_Status LOC_Status = Status_NOK;
     u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
 
-    if (NVIC_IQR > _NVIC_IRQ_NUM)
+    if (NVIC_IQR >= _NVIC_IRQ_NUM)
     {
         LOC_Status = Status_Invalid_Input;
     }
@@ -160,7 +160,7 @@ Error_Status NVIC_CFG_SetPriority(IRQ_ID_t NVIC_IQR, u8_t PreemptPri, u8_t SubGr
     u8_t Priority_Index = NVIC_IQR % NVIC_PRI_REG_THRESHOLD;
     u8_t LOC_TempPRiority = 0;
 
-    if (NVIC_IQR > _NVIC_IRQ_NUM)
+    if (NVIC_IQR >= _NVIC_IRQ_NUM)
     {
         LOC_Status = Status_Invalid_Input;
     }
