@@ -192,7 +192,7 @@ Error_Status NVIC_CFG_SetPriority(IRQ_ID_t NVIC_IQR, u8_t PreemptPri, u8_t SubGr
     {
         LOC_Status = Status_Invalid_Input;
     }
-    else if (SubGroupPri >= (2 * SubGroupBits) || PreemptPri >= 2 * (IMPLEMENTED_PRIORITY_BITS - SubGroupBits))
+    else if (SubGroupPri >= (2 ^ SubGroupBits) || PreemptPri >= 2 ^ (IMPLEMENTED_PRIORITY_BITS - SubGroupBits))
     {
         LOC_Status = Status_Invalid_Input;
     }
