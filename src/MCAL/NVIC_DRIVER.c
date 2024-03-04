@@ -72,6 +72,12 @@ u32_t IRQ_BIT_Position[32] = {
     0x1000000, 0x2000000, 0x4000000, 0x8000000, 0x10000000, 0x20000000, 0x40000000, 0x80000000};
 
 /********************************************************************************************************/
+/*****************************************Static Functions Prototype*************************************/
+/********************************************************************************************************/
+
+static u8_t power(u8_t num, u8_t pow);
+
+/********************************************************************************************************/
 /*********************************************APIs Implementation****************************************/
 /********************************************************************************************************/
 
@@ -192,7 +198,7 @@ Error_Status NVIC_CFG_SetPriority(IRQ_ID_t NVIC_IQR, u8_t PreemptPri, u8_t SubGr
     {
         LOC_Status = Status_Invalid_Input;
     }
-    else if (SubGroupPri >= (2 ^ SubGroupBits) || PreemptPri >= 2 ^ (IMPLEMENTED_PRIORITY_BITS - SubGroupBits))
+    else if (SubGroupPri >= power(2, SubGroupBits) || PreemptPri >= power(2, IMPLEMENTED_PRIORITY_BITS - SubGroupBits))
     {
         LOC_Status = Status_Invalid_Input;
     }
@@ -245,4 +251,17 @@ Error_Status NVIC_CFG_SetSubGroupBits(u32_t SubGroupBit)
         SCB->AIRCR = LOC_AIRCR;
     }
     return LOC_Status;
+}
+
+static u8_t power(u8_t num, u8_t pow)
+{
+    u8_t result = 1;
+    u8_t i;
+
+    for (i = 0; i < pow; i++)
+    {
+        result = result * num;
+    }
+
+    return result;
 }
