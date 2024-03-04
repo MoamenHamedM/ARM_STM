@@ -16,6 +16,7 @@
 #define PRIORITY_CLEARFLAG 0x000000FF
 #define PRIORITY_GETFLAG 0x000000FF
 #define TOTAL_PRIORITY_BITS 8
+#define SOC_AIRCR_WRITEENABLE 0x05FA0000
 
 /********************************************************************************************************/
 /************************************************Types***************************************************/
@@ -63,7 +64,7 @@ typedef struct
 /********************************************************************************************************/
 
 NVIC_t *const NVIC = (NVIC_t *)NVIC_BASE_ADDRESS;
-SCB_t *const SCB = (NVIC_t *)SCB_BASE_ADDRESS;
+SCB_t *const SCB = (SCB_t *)SCB_BASE_ADDRESS;
 
 u32_t IRQ_BIT_Position[32] = {
     0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80,
@@ -247,7 +248,7 @@ Error_Status NVIC_CFG_SetSubGroupBits(u32_t SubGroupBit)
     {
         LOC_Status = Status_OK;
         LOC_AIRCR &= ~SUBGROUPBIT_CLEARFLAG;
-        LOC_AIRCR |= SubGroupBit;
+        LOC_AIRCR |= SubGroupBit | SOC_AIRCR_WRITEENABLE;
         SCB->AIRCR = LOC_AIRCR;
     }
     return LOC_Status;

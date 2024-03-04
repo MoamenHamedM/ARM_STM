@@ -1,6 +1,7 @@
 
 #include "MCAL/RCC_DRIVER.h"
 #include "MCAL/GPIO_DRIVER.h"
+#include "MCAL/NVIC_DRIVER.h"
 #include "HAL/LED.h"
 #include "HAL/SW.h"
 #include "HAL/CLOCK_HANDLER.h"
@@ -8,7 +9,8 @@
 #define TEST_RCC 0
 #define TEST_GPIO 1
 #define TEST_LED_SW 2
-#define APP TEST_LED_SW
+#define TEST_NVIC 3
+#define APP TEST_NVIC
 
 // ----- main() ---------------------------------------------------------------
 
@@ -102,6 +104,16 @@ int main(int argc, char *argv[])
       SW_GetState(SW_ON, &SW_State);
     }
   }
+
+#endif
+
+#if APP == TEST_NVIC
+
+  NVIC_CTRL_EnableIRQ(NVIC_IRQ_WWDG);
+
+  NVIC_CFG_SetSubGroupBits(SUBGROUPBIT_TWO);
+
+  NVIC_CFG_SetPriority(NVIC_IRQ_WWDG, 2, 1, 2);
 
 #endif
 
