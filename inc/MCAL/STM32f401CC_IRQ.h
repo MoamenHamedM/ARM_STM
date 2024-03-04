@@ -1,6 +1,8 @@
 #ifndef STM32F401CC_IRQ_
 #define STM32F401CC_IRQ_
 
+#define IMPLEMENTED_PRIORITY_BITS 4
+
 typedef enum
 {
     NVIC_IRQ_WWDG,
