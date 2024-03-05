@@ -21,6 +21,30 @@
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #pragma GCC diagnostic ignored "-Wreturn-type"
 
+#if APP == TEST_NVIC
+void delay_ms(u32_t ms)
+{
+  for (volatile u32_t i = 0; i < ms * 16000; ++i)
+  {
+  }
+}
+void EXTI0_IRQHandler(void)
+{
+  LED_SetState(LED_Alarm, LED_STATE_ON);
+  // NVIC_CTRL_SetIRQPending(NVIC_IRQ_EXTI1);
+  //  NVIC_CTRL_GenerateSWI(NVIC_IRQ_EXTI1);
+  //  delay_ms(100);
+}
+void EXTI1_IRQHandler(void)
+{
+  // NVIC_CTRL_GenerateSWI(NVIC_IRQ_EXTI0);
+  NVIC_CTRL_GenerateSWI(NVIC_IRQ_EXTI0);
+  // LED_SetState(LED_Alarm, LED_STATE_OFF);
+  // delay_ms(100);
+}
+
+#endif
+
 int main(int argc, char *argv[])
 {
   // At this stage the system clock should have already been configured
@@ -109,12 +133,19 @@ int main(int argc, char *argv[])
 
 #if APP == TEST_NVIC
 
-  NVIC_CTRL_EnableIRQ(NVIC_IRQ_WWDG);
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
+  LED_Init();
+  NVIC_CTRL_EnableIRQ(NVIC_IRQ_EXTI0);
+  NVIC_CTRL_EnableIRQ(NVIC_IRQ_EXTI1);
+  NVIC_CFG_SetSubGroupBits(SUBGROUPBIT_ONE);
+  NVIC_CFG_SetPriority(NVIC_IRQ_EXTI0, 2, 1, 1);
+  NVIC_CFG_SetPriority(NVIC_IRQ_EXTI1, 1, 1, 1);
+  // NVIC_CTRL_SetIRQPending(NVIC_IRQ_EXTI1);
+  NVIC_CTRL_GenerateSWI(NVIC_IRQ_EXTI0);
 
-  NVIC_CFG_SetSubGroupBits(SUBGROUPBIT_TWO);
-
-  NVIC_CFG_SetPriority(NVIC_IRQ_WWDG, 2, 1, 2);
-
+  while (1)
+  {
+  }
 #endif
 
   return 0;

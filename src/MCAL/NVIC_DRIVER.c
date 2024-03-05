@@ -12,7 +12,7 @@
 
 #define NVIC_REG_THRESHOLD 32
 #define NVIC_PRI_REG_THRESHOLD 4
-#define SUBGROUPBIT_CLEARFLAG 0x00000700
+#define SUBGROUPBIT_CLEARFLAG 0xFFFF0700
 #define PRIORITY_CLEARFLAG 0x000000FF
 #define PRIORITY_GETFLAG 0x000000FF
 #define TOTAL_PRIORITY_BITS 8
@@ -41,7 +41,7 @@ typedef struct
 typedef struct
 {
     volatile u32_t ACTLR;
-    volatile u32_t Reserved1[830];
+    volatile u32_t Reserved1[829];
     volatile u32_t CPUID;
     volatile u32_t ICSR;
     volatile u32_t VTOR;
@@ -86,6 +86,7 @@ Error_Status NVIC_CTRL_EnableIRQ(IRQ_ID_t NVIC_IQR)
 {
     Error_Status LOC_Status = Status_NOK;
     u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
+    u32_t BIT_Index = NVIC_IQR - (REG_Index * NVIC_REG_THRESHOLD);
 
     if (NVIC_IQR >= _NVIC_IRQ_NUM)
     {
@@ -94,7 +95,7 @@ Error_Status NVIC_CTRL_EnableIRQ(IRQ_ID_t NVIC_IQR)
     else
     {
         LOC_Status = Status_OK;
-        NVIC->ISER[REG_Index] = IRQ_BIT_Position[(NVIC_IQR - (REG_Index * NVIC_REG_THRESHOLD))];
+        NVIC->ISER[REG_Index] = IRQ_BIT_Position[BIT_Index];
     }
     return LOC_Status;
 }
@@ -103,6 +104,7 @@ Error_Status NVIC_CTRL_DisableIRQ(IRQ_ID_t NVIC_IQR)
 {
     Error_Status LOC_Status = Status_NOK;
     u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
+    u32_t BIT_Index = NVIC_IQR - (REG_Index * NVIC_REG_THRESHOLD);
 
     if (NVIC_IQR >= _NVIC_IRQ_NUM)
     {
@@ -111,7 +113,7 @@ Error_Status NVIC_CTRL_DisableIRQ(IRQ_ID_t NVIC_IQR)
     else
     {
         LOC_Status = Status_OK;
-        NVIC->ICER[REG_Index] = IRQ_BIT_Position[(NVIC_IQR - (REG_Index * NVIC_REG_THRESHOLD))];
+        NVIC->ICER[REG_Index] = IRQ_BIT_Position[BIT_Index];
     }
     return LOC_Status;
 }
@@ -120,6 +122,7 @@ Error_Status NVIC_CTRL_SetIRQPending(IRQ_ID_t NVIC_IQR)
 {
     Error_Status LOC_Status = Status_NOK;
     u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
+    u32_t BIT_Index = NVIC_IQR - (REG_Index * NVIC_REG_THRESHOLD);
 
     if (NVIC_IQR >= _NVIC_IRQ_NUM)
     {
@@ -128,7 +131,7 @@ Error_Status NVIC_CTRL_SetIRQPending(IRQ_ID_t NVIC_IQR)
     else
     {
         LOC_Status = Status_OK;
-        NVIC->ISPR[REG_Index] = IRQ_BIT_Position[(NVIC_IQR - (REG_Index * NVIC_REG_THRESHOLD))];
+        NVIC->ISPR[REG_Index] = IRQ_BIT_Position[BIT_Index];
     }
     return LOC_Status;
 }
@@ -137,6 +140,7 @@ Error_Status NVIC_CTRL_ClearIRQPending(IRQ_ID_t NVIC_IQR)
 {
     Error_Status LOC_Status = Status_NOK;
     u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
+    u32_t BIT_Index = NVIC_IQR - (REG_Index * NVIC_REG_THRESHOLD);
 
     if (NVIC_IQR >= _NVIC_IRQ_NUM)
     {
@@ -145,7 +149,7 @@ Error_Status NVIC_CTRL_ClearIRQPending(IRQ_ID_t NVIC_IQR)
     else
     {
         LOC_Status = Status_OK;
-        NVIC->ICPR[REG_Index] = IRQ_BIT_Position[(NVIC_IQR - (REG_Index * NVIC_REG_THRESHOLD))];
+        NVIC->ICPR[REG_Index] = IRQ_BIT_Position[BIT_Index];
     }
     return LOC_Status;
 }
@@ -161,6 +165,7 @@ Error_Status NVIC_CTRL_GenerateSWI(IRQ_ID_t NVIC_IQR)
     else
     {
         LOC_Status = Status_OK;
+        // SCB->CCR |= 2;  need to be tested
         NVIC->STIR = NVIC_IQR;
     }
     return LOC_Status;
@@ -170,6 +175,7 @@ Error_Status NVIC_Get_ActiveStatus(IRQ_ID_t NVIC_IQR, u32_t *Status)
 {
     Error_Status LOC_Status = Status_NOK;
     u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
+    u32_t BIT_Index = NVIC_IQR - (REG_Index * NVIC_REG_THRESHOLD);
 
     if (NVIC_IQR >= _NVIC_IRQ_NUM)
     {
@@ -182,7 +188,7 @@ Error_Status NVIC_Get_ActiveStatus(IRQ_ID_t NVIC_IQR, u32_t *Status)
     else
     {
         LOC_Status = Status_OK;
-        *Status = (NVIC->IABR[REG_Index] >> (NVIC_IQR - (REG_Index * NVIC_REG_THRESHOLD))) & 1;
+        *Status = (NVIC->IABR[REG_Index] >> BIT_Index) & 1;
     }
     return LOC_Status;
 }
