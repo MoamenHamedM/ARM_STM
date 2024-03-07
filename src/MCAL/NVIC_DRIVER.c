@@ -13,6 +13,7 @@
 #define NVIC_REG_THRESHOLD 32
 #define NVIC_PRI_REG_THRESHOLD 4
 #define SUBGROUPBIT_CLEARFLAG 0xFFFF0700
+#define SUBGROUPBIT_GETFLAG 0x03
 #define PRIORITY_CLEARFLAG 0x000000FF
 #define PRIORITY_GETFLAG 0x000000FF
 #define TOTAL_PRIORITY_BITS 8
@@ -66,12 +67,13 @@ typedef struct
 NVIC_t *const NVIC = (NVIC_t *)NVIC_BASE_ADDRESS;
 SCB_t *const SCB = (SCB_t *)SCB_BASE_ADDRESS;
 
-u32_t IRQ_BIT_Position[32] = {
+static u32_t IRQ_BIT_Position[32] = {
     0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80,
     0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000,
     0x10000, 0x20000, 0x40000, 0x80000, 0x100000, 0x200000, 0x400000, 0x800000,
     0x1000000, 0x2000000, 0x4000000, 0x8000000, 0x10000000, 0x20000000, 0x40000000, 0x80000000};
 
+static u8_t NVIC_SubGroupBits = 0;
 /********************************************************************************************************/
 /*****************************************Static Functions Prototype*************************************/
 /********************************************************************************************************/
@@ -193,7 +195,7 @@ Error_Status NVIC_Get_ActiveStatus(IRQ_ID_t NVIC_IQR, u32_t *Status)
     return LOC_Status;
 }
 
-Error_Status NVIC_CFG_SetPriority(IRQ_ID_t NVIC_IQR, u8_t PreemptPri, u8_t SubGroupPri, u8_t SubGroupBits)
+Error_Status NVIC_CFG_SetPriority(IRQ_ID_t NVIC_IQR, u8_t PreemptPri, u8_t SubGroupPri)
 {
     Error_Status LOC_Status = Status_NOK;
     u8_t REG_Index = NVIC_IQR / NVIC_PRI_REG_THRESHOLD;
@@ -201,11 +203,11 @@ Error_Status NVIC_CFG_SetPriority(IRQ_ID_t NVIC_IQR, u8_t PreemptPri, u8_t SubGr
     u8_t Imp_Pri_Index = Tot_Pri_Index + (TOTAL_PRIORITY_BITS - IMPLEMENTED_PRIORITY_BITS);
     u32_t LOC_TempPRiority = NVIC->IPR[REG_Index];
 
-    if (NVIC_IQR >= _NVIC_IRQ_NUM || SubGroupBits > IMPLEMENTED_PRIORITY_BITS)
+    if (NVIC_IQR >= _NVIC_IRQ_NUM || NVIC_SubGroupBits > IMPLEMENTED_PRIORITY_BITS)
     {
         LOC_Status = Status_Invalid_Input;
     }
-    else if (SubGroupPri >= power(2, SubGroupBits) || PreemptPri >= power(2, IMPLEMENTED_PRIORITY_BITS - SubGroupBits))
+    else if (SubGroupPri >= power(2, NVIC_SubGroupBits) || PreemptPri >= power(2, IMPLEMENTED_PRIORITY_BITS - NVIC_SubGroupBits))
     {
         LOC_Status = Status_Invalid_Input;
     }
@@ -213,7 +215,7 @@ Error_Status NVIC_CFG_SetPriority(IRQ_ID_t NVIC_IQR, u8_t PreemptPri, u8_t SubGr
     {
         LOC_Status = Status_OK;
         LOC_TempPRiority &= ~(PRIORITY_CLEARFLAG << Tot_Pri_Index);
-        LOC_TempPRiority |= ((PreemptPri << (Imp_Pri_Index + SubGroupBits)) | (SubGroupPri << Imp_Pri_Index)) << Tot_Pri_Index;
+        LOC_TempPRiority |= ((PreemptPri << (Imp_Pri_Index + NVIC_SubGroupBits)) | (SubGroupPri << Imp_Pri_Index)) << Tot_Pri_Index;
         NVIC->IPR[REG_Index] = LOC_TempPRiority;
     }
     return LOC_Status;
@@ -252,6 +254,7 @@ Error_Status NVIC_CFG_SetSubGroupBits(u32_t SubGroupBit)
     }
     else
     {
+        NVIC_SubGroupBits = (SubGroupBit >> SUBGROUPBIT_GETFLAG) ? ((SubGroupBit & SUBGROUPBIT_GETFLAG) + 1) : 0;
         LOC_Status = Status_OK;
         LOC_AIRCR &= ~SUBGROUPBIT_CLEARFLAG;
         LOC_AIRCR |= SubGroupBit | SOC_AIRCR_WRITEENABLE;

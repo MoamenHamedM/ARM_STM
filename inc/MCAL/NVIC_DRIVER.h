@@ -86,11 +86,10 @@ Error_Status NVIC_Get_ActiveStatus(IRQ_ID_t NVIC_IQR, u32_t *Status);
  * NVIC_IQR -> the ID of the requested interrupt from the target IRQ_ID list
  * PreemptPri -> value of the Preemption priority level
  * SubGroupPri -> value of the Subgroup priority level
- * SubGroupBits -> the number of configured subgroup bits
  * return:
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
  */
-Error_Status NVIC_CFG_SetPriority(IRQ_ID_t NVIC_IQR, u8_t PreemptPri, u8_t SubGroupPri, u8_t SubGroupBits);
+Error_Status NVIC_CFG_SetPriority(IRQ_ID_t NVIC_IQR, u8_t PreemptPri, u8_t SubGroupPri);
 
 /*
  * use this function to read the priority of an IRQ
