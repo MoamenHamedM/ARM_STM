@@ -1,13 +1,14 @@
 {
-	"folders": [
-		{
-			"path": "."
-		}
-	],
-	"settings": {
-		"files.associations": {
-			"rcc_driver.h": "c",
-			"led.h": "c"
-		}
-	}
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.associations": {
+      "rcc_driver.h": "c",
+      "led.h": "c",
+      "systick_driver.h": "c"
+    }
+  }
 }
