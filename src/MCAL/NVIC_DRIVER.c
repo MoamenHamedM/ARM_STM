@@ -67,12 +67,6 @@ typedef struct
 NVIC_t *const NVIC = (NVIC_t *)NVIC_BASE_ADDRESS;
 SCB_t *const SCB = (SCB_t *)SCB_BASE_ADDRESS;
 
-static u32_t IRQ_BIT_Position[32] = {
-    0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80,
-    0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000,
-    0x10000, 0x20000, 0x40000, 0x80000, 0x100000, 0x200000, 0x400000, 0x800000,
-    0x1000000, 0x2000000, 0x4000000, 0x8000000, 0x10000000, 0x20000000, 0x40000000, 0x80000000};
-
 static u8_t NVIC_SubGroupBits = 0;
 /********************************************************************************************************/
 /*****************************************Static Functions Prototype*************************************/
@@ -84,83 +78,79 @@ static u8_t power(u8_t num, u8_t pow);
 /*********************************************APIs Implementation****************************************/
 /********************************************************************************************************/
 
-Error_Status NVIC_CTRL_EnableIRQ(IRQ_ID_t NVIC_IQR)
+Error_Status NVIC_CTRL_EnableIRQ(IRQ_ID_t NVIC_IRQ)
 {
     Error_Status LOC_Status = Status_NOK;
-    u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
-    u32_t BIT_Index = NVIC_IQR - (REG_Index * NVIC_REG_THRESHOLD);
+    u32_t REG_Index = NVIC_IRQ / NVIC_REG_THRESHOLD;
 
-    if (NVIC_IQR >= _NVIC_IRQ_NUM)
+    if (NVIC_IRQ >= _NVIC_IRQ_NUM)
     {
         LOC_Status = Status_Invalid_Input;
     }
     else
     {
         LOC_Status = Status_OK;
-        NVIC->ISER[REG_Index] = IRQ_BIT_Position[BIT_Index];
+        NVIC->ISER[REG_Index] = (1 << (NVIC_IRQ % NVIC_REG_THRESHOLD));
     }
     return LOC_Status;
 }
 
-Error_Status NVIC_CTRL_DisableIRQ(IRQ_ID_t NVIC_IQR)
+Error_Status NVIC_CTRL_DisableIRQ(IRQ_ID_t NVIC_IRQ)
 {
     Error_Status LOC_Status = Status_NOK;
-    u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
-    u32_t BIT_Index = NVIC_IQR - (REG_Index * NVIC_REG_THRESHOLD);
+    u32_t REG_Index = NVIC_IRQ / NVIC_REG_THRESHOLD;
 
-    if (NVIC_IQR >= _NVIC_IRQ_NUM)
+    if (NVIC_IRQ >= _NVIC_IRQ_NUM)
     {
         LOC_Status = Status_Invalid_Input;
     }
     else
     {
         LOC_Status = Status_OK;
-        NVIC->ICER[REG_Index] = IRQ_BIT_Position[BIT_Index];
+        NVIC->ICER[REG_Index] = (1 << (NVIC_IRQ % NVIC_REG_THRESHOLD));
     }
     return LOC_Status;
 }
 
-Error_Status NVIC_CTRL_SetIRQPending(IRQ_ID_t NVIC_IQR)
+Error_Status NVIC_CTRL_SetIRQPending(IRQ_ID_t NVIC_IRQ)
 {
     Error_Status LOC_Status = Status_NOK;
-    u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
-    u32_t BIT_Index = NVIC_IQR - (REG_Index * NVIC_REG_THRESHOLD);
+    u32_t REG_Index = NVIC_IRQ / NVIC_REG_THRESHOLD;
 
-    if (NVIC_IQR >= _NVIC_IRQ_NUM)
+    if (NVIC_IRQ >= _NVIC_IRQ_NUM)
     {
         LOC_Status = Status_Invalid_Input;
     }
     else
     {
         LOC_Status = Status_OK;
-        NVIC->ISPR[REG_Index] = IRQ_BIT_Position[BIT_Index];
+        NVIC->ISPR[REG_Index] = (1 << (NVIC_IRQ % NVIC_REG_THRESHOLD));
     }
     return LOC_Status;
 }
 
-Error_Status NVIC_CTRL_ClearIRQPending(IRQ_ID_t NVIC_IQR)
+Error_Status NVIC_CTRL_ClearIRQPending(IRQ_ID_t NVIC_IRQ)
 {
     Error_Status LOC_Status = Status_NOK;
-    u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
-    u32_t BIT_Index = NVIC_IQR - (REG_Index * NVIC_REG_THRESHOLD);
+    u32_t REG_Index = NVIC_IRQ / NVIC_REG_THRESHOLD;
 
-    if (NVIC_IQR >= _NVIC_IRQ_NUM)
+    if (NVIC_IRQ >= _NVIC_IRQ_NUM)
     {
         LOC_Status = Status_Invalid_Input;
     }
     else
     {
         LOC_Status = Status_OK;
-        NVIC->ICPR[REG_Index] = IRQ_BIT_Position[BIT_Index];
+        NVIC->ICPR[REG_Index] = (1 << (NVIC_IRQ % NVIC_REG_THRESHOLD));
     }
     return LOC_Status;
 }
 
-Error_Status NVIC_CTRL_GenerateSWI(IRQ_ID_t NVIC_IQR)
+Error_Status NVIC_CTRL_GenerateSWI(IRQ_ID_t NVIC_IRQ)
 {
     Error_Status LOC_Status = Status_NOK;
 
-    if (NVIC_IQR >= _NVIC_IRQ_NUM)
+    if (NVIC_IRQ >= _NVIC_IRQ_NUM)
     {
         LOC_Status = Status_Invalid_Input;
     }
@@ -168,18 +158,18 @@ Error_Status NVIC_CTRL_GenerateSWI(IRQ_ID_t NVIC_IQR)
     {
         LOC_Status = Status_OK;
         // SCB->CCR |= 2;  need to be tested
-        NVIC->STIR = NVIC_IQR;
+        NVIC->STIR = NVIC_IRQ;
     }
     return LOC_Status;
 }
 
-Error_Status NVIC_Get_ActiveStatus(IRQ_ID_t NVIC_IQR, u32_t *Status)
+Error_Status NVIC_Get_ActiveStatus(IRQ_ID_t NVIC_IRQ, u32_t *Status)
 {
     Error_Status LOC_Status = Status_NOK;
-    u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
-    u32_t BIT_Index = NVIC_IQR - (REG_Index * NVIC_REG_THRESHOLD);
+    u32_t REG_Index = NVIC_IRQ / NVIC_REG_THRESHOLD;
+    u32_t BIT_Index = NVIC_IRQ % NVIC_REG_THRESHOLD;
 
-    if (NVIC_IQR >= _NVIC_IRQ_NUM)
+    if (NVIC_IRQ >= _NVIC_IRQ_NUM)
     {
         LOC_Status = Status_Invalid_Input;
     }
@@ -195,15 +185,15 @@ Error_Status NVIC_Get_ActiveStatus(IRQ_ID_t NVIC_IQR, u32_t *Status)
     return LOC_Status;
 }
 
-Error_Status NVIC_CFG_SetPriority(IRQ_ID_t NVIC_IQR, u8_t PreemptPri, u8_t SubGroupPri)
+Error_Status NVIC_CFG_SetPriority(IRQ_ID_t NVIC_IRQ, u8_t PreemptPri, u8_t SubGroupPri)
 {
     Error_Status LOC_Status = Status_NOK;
-    u8_t REG_Index = NVIC_IQR / NVIC_PRI_REG_THRESHOLD;
-    u8_t Tot_Pri_Index = (NVIC_IQR % NVIC_PRI_REG_THRESHOLD) * NVIC_PRI_REG_THRESHOLD;
+    u8_t REG_Index = NVIC_IRQ / NVIC_PRI_REG_THRESHOLD;
+    u8_t Tot_Pri_Index = (NVIC_IRQ % NVIC_PRI_REG_THRESHOLD) * NVIC_PRI_REG_THRESHOLD;
     u8_t Imp_Pri_Index = Tot_Pri_Index + (TOTAL_PRIORITY_BITS - IMPLEMENTED_PRIORITY_BITS);
     u32_t LOC_TempPRiority = NVIC->IPR[REG_Index];
 
-    if (NVIC_IQR >= _NVIC_IRQ_NUM || NVIC_SubGroupBits > IMPLEMENTED_PRIORITY_BITS)
+    if (NVIC_IRQ >= _NVIC_IRQ_NUM || NVIC_SubGroupBits > IMPLEMENTED_PRIORITY_BITS)
     {
         LOC_Status = Status_Invalid_Input;
     }
@@ -221,13 +211,13 @@ Error_Status NVIC_CFG_SetPriority(IRQ_ID_t NVIC_IQR, u8_t PreemptPri, u8_t SubGr
     return LOC_Status;
 }
 
-Error_Status NVIC_Get_Priority(IRQ_ID_t NVIC_IQR, u32_t *Priority)
+Error_Status NVIC_Get_Priority(IRQ_ID_t NVIC_IRQ, u32_t *Priority)
 {
     Error_Status LOC_Status = Status_NOK;
-    u32_t REG_Index = NVIC_IQR / NVIC_REG_THRESHOLD;
-    u32_t Tot_Pri_Index = (NVIC_IQR % NVIC_PRI_REG_THRESHOLD) * NVIC_PRI_REG_THRESHOLD;
+    u32_t REG_Index = NVIC_IRQ / NVIC_REG_THRESHOLD;
+    u32_t Tot_Pri_Index = (NVIC_IRQ % NVIC_PRI_REG_THRESHOLD) * NVIC_PRI_REG_THRESHOLD;
 
-    if (NVIC_IQR >= _NVIC_IRQ_NUM)
+    if (NVIC_IRQ >= _NVIC_IRQ_NUM)
     {
         LOC_Status = Status_Invalid_Input;
     }

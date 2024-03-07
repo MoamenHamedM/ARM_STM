@@ -138,8 +138,8 @@ int main(int argc, char *argv[])
   NVIC_CTRL_EnableIRQ(NVIC_IRQ_EXTI0);
   NVIC_CTRL_EnableIRQ(NVIC_IRQ_EXTI1);
   NVIC_CFG_SetSubGroupBits(SUBGROUPBIT_ONE);
-  NVIC_CFG_SetPriority(NVIC_IRQ_EXTI0, 2, 1, 1);
-  NVIC_CFG_SetPriority(NVIC_IRQ_EXTI1, 1, 1, 1);
+  NVIC_CFG_SetPriority(NVIC_IRQ_EXTI0, 2, 1);
+  NVIC_CFG_SetPriority(NVIC_IRQ_EXTI1, 1, 1);
   // NVIC_CTRL_SetIRQPending(NVIC_IRQ_EXTI1);
   NVIC_CTRL_GenerateSWI(NVIC_IRQ_EXTI0);
 
