@@ -189,7 +189,7 @@ Error_Status NVIC_CFG_SetPriority(IRQ_ID_t NVIC_IRQ, u8_t PreemptPri, u8_t SubGr
 {
     Error_Status LOC_Status = Status_NOK;
     u8_t REG_Index = NVIC_IRQ / NVIC_PRI_REG_THRESHOLD;
-    u8_t Tot_Pri_Index = (NVIC_IRQ % NVIC_PRI_REG_THRESHOLD) * NVIC_PRI_REG_THRESHOLD;
+    u8_t Tot_Pri_Index = (NVIC_IRQ % NVIC_PRI_REG_THRESHOLD) * TOTAL_PRIORITY_BITS;
     u8_t Imp_Pri_Index = Tot_Pri_Index + (TOTAL_PRIORITY_BITS - IMPLEMENTED_PRIORITY_BITS);
     u32_t LOC_TempPRiority = NVIC->IPR[REG_Index];
 
