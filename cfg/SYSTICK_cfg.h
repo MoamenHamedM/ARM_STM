@@ -1,0 +1,6 @@
+#ifndef SYSTICK_CFG_
+#define SYSTICK_CFG_
+
+#define SYSTICK_SRC_CLOCK 16000000
+
+#endif // SYSTICK_CFG_
