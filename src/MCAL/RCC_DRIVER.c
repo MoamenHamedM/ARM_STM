@@ -50,6 +50,8 @@ typedef struct
 
 RCC_PERI_t *const RCC = (RCC_PERI_t *)RCC_BASE_ADDRESS;
 
+u32_t SYSCLK_Freq = 0xF42400; // default frequency of the HSI clock 16,000,000 MHz
+
 static Error_Status RCC_CTRL_AHB1_PeriEnable(u32_t AHB1_Peri);
 static Error_Status RCC_CTRL_AHB1_PeriDisable(u32_t AHB1_Peri);
 static Error_Status RCC_CTRL_AHB2_PeriEnable(u32_t AHB2_Peri);

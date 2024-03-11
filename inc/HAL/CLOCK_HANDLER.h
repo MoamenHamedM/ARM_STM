@@ -42,10 +42,22 @@
 #define CLK_HAND_PERI_TIM9 0x03010000
 #define CLK_HAND_PERI_TIM10 0x03020000
 #define CLK_HAND_PERI_TIM11 0x03040000
+#define SYS_ClOCK_HSI 0x00000000
+#define SYS_ClOCK_HSE 0x00000001
+#define SYS_ClOCK_PLL 0x00000002
 
 /********************************************************************************************************/
 /************************************************APIs****************************************************/
 /********************************************************************************************************/
+
+/*
+ * Function to select a clock in the system to be the system clock
+ * parameters:
+ * Clock  -> SYS_ClOCK_HSI, SYS_ClOCK_HSE, SYS_ClOCK_PLL
+ * return:
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
+ */
+Error_Status CLK_HAND_SEL_SystemCLK(u32_t SYS_Clock);
 
 /*
  * Function to enable any Peripheral in the System

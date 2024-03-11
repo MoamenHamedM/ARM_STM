@@ -190,4 +190,13 @@ Error_Status RCC_CFG_APB_HighSpeed_Prescaler(u32_t APB_Pre);
  */
 Error_Status RCC_CFG_APB_LowSpeed_Prescaler(u32_t APB_Pre);
 
+/*
+ * Function to read the current frequency of the system clock
+ * parameters:
+ * Clock  -> address to the variable to store the frequency
+ * return:
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
+ */
+Error_Status RCC_Read_SysCLKFreq(u32_t *SYSClock);
+
 #endif /* RCC_DRIVER_H_ */

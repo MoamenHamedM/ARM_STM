@@ -35,4 +35,13 @@ Error_Status LED_Init();
  */
 Error_Status LED_SetState(u32_t Led, u8_t State);
 
+/*
+ * use this function to toggle the state of a led
+ * Parameters:
+ * Led -> the name of the desired led
+ * return:
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
+ */
+Error_Status LED_ToggleLed(u32_t Led);
+
 #endif

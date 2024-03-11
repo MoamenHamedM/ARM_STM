@@ -5,12 +5,16 @@
 #include "HAL/LED.h"
 #include "HAL/SW.h"
 #include "HAL/CLOCK_HANDLER.h"
+#include "MCAL/SYSTICK_DRIVER.h"
+#include "HAL/SCHEDULER.h"
 
 #define TEST_RCC 0
 #define TEST_GPIO 1
 #define TEST_LED_SW 2
 #define TEST_NVIC 3
-#define APP TEST_NVIC
+#define TEST_SYSTICK 4
+#define TEST_SCHD 5
+#define APP TEST_SCHD
 
 // ----- main() ---------------------------------------------------------------
 
@@ -20,6 +24,8 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #pragma GCC diagnostic ignored "-Wreturn-type"
+
+void Runnable_APP1(void);
 
 #if APP == TEST_NVIC
 void delay_ms(u32_t ms)
@@ -147,6 +153,28 @@ int main(int argc, char *argv[])
   {
   }
 #endif
+#if APP == TEST_SYSTICK
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
+  LED_Init();
+  SYSTICK_SET_CallBack(&Runnable_APP1);
+  SYSTICK_CTRL_Interrupt(SYSTICK_IRQ_ENABLE);
+  SYSTICK_SET_CurrentVal(0);
+  SYSTICK_CFG_CLKSource(SYSTICK_CLK_AHB);
+  SYSTICK_SET_TimeTicksMs(300);
+  SYSTICK_CTRL_StartTimer();
+  while (1)
+  {
+    /* code */
+  }
+
+#endif
+#if APP == TEST_SCHD
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
+  LED_Init();
+  SCH_CFG_SchedulerInit();
+  SCH_CTRL_StartScheduler();
+
+#endif
 
   return 0;
 }
@@ -154,3 +182,6 @@ int main(int argc, char *argv[])
 #pragma GCC diagnostic pop
 
 // ----------------------------------------------------------------------------
+
+
+

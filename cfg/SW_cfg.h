@@ -5,8 +5,7 @@
 
 typedef enum
 {
-    SW_ON,
-    SW_OFF,
+    SW_ONE,
     _SW_Num
 } Switches_t;
 

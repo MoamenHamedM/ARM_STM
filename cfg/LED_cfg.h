@@ -6,8 +6,7 @@
 typedef enum
 {
     LED_Alarm,
-    LED_Red,
-    LED_green,
+    LED_2,
     _LED_Num
 } Leds_t;
 

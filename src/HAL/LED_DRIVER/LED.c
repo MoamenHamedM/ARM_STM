@@ -28,3 +28,13 @@ Error_Status LED_SetState(u32_t Led, u8_t State)
     LOC_Status = GPIO_Set_PinValue(Leds[Led].Port, Leds[Led].Pin, Leds[Led].Direct ^ State);
     return LOC_Status;
 }
+
+Error_Status LED_ToggleLed(u32_t Led)
+{
+    Error_Status LOC_Status = Status_NOK;
+    u8_t LOC_State;
+    LOC_Status = GPIO_Get_PinValue(Leds[Led].Port, Leds[Led].Pin, &LOC_State);
+    LOC_Status = GPIO_Set_PinValue(Leds[Led].Port, Leds[Led].Pin, LOC_State ^ 1);
+
+    return LOC_Status;
+}
