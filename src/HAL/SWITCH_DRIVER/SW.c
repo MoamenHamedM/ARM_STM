@@ -4,6 +4,7 @@
 #include "MCAL/GPIO_DRIVER.h"
 
 extern const SW_cfg_t Switches[_SW_Num];
+u8_t SW_PhysicalState[_SW_Num];
 
 Error_Status SW_Init()
 {
@@ -24,15 +25,39 @@ Error_Status SW_Init()
 Error_Status SW_GetState(u32_t Switch, u8_t *SW_State)
 {
     Error_Status LOC_Status = Status_NOK;
-    u8_t LOC_Temp;
     if (SW_State == NULL)
     {
         LOC_Status = Status_Null_Pointer;
     }
     else
     {
-        LOC_Status = GPIO_Get_PinValue(Switches[Switch].Port, Switches[Switch].Pin, &LOC_Temp);
-        *SW_State = !(LOC_Temp ^ (Switches[Switch].Direct >> SW_4BIT_OFFSET));
+        *SW_State = !(SW_PhysicalState[Switch] ^ (Switches[Switch].Direct >> SW_4BIT_OFFSET));
     }
     return LOC_Status;
+}
+
+void SW_Runnable(void)
+{
+    u8_t Index;
+    u8_t Curr;
+    static u8_t Prev[_SW_Num] = {0};
+    static u8_t Counts[_SW_Num];
+    for (Index = 0; Index < _SW_Num; Index++)
+    {
+        GPIO_Get_PinValue(Switches[Index].Port, Switches[Index].Pin, &Curr);
+        if (Curr == Prev[Index])
+        {
+            Counts[Index]++;
+        }
+        else
+        {
+            Counts[Index] = 0;
+        }
+        if (Counts[Index] == 5)
+        {
+            SW_PhysicalState[Index] = Curr;
+            Counts[Index] = 0;
+        }
+        Prev[Index] = Curr;
+    }
 }
