@@ -3,6 +3,8 @@
 #include "HAL/SW.h"
 #include "MCAL/GPIO_DRIVER.h"
 
+#define SW_STABLE_THRESHOLD 5
+
 extern const SW_cfg_t Switches[_SW_Num];
 u8_t SW_PhysicalState[_SW_Num];
 
@@ -41,7 +43,7 @@ void SW_Runnable(void)
     u8_t Index;
     u8_t Curr;
     static u8_t Prev[_SW_Num] = {0};
-    static u8_t Counts[_SW_Num];
+    static u8_t Counts[_SW_Num] = {0};
     for (Index = 0; Index < _SW_Num; Index++)
     {
         GPIO_Get_PinValue(Switches[Index].Port, Switches[Index].Pin, &Curr);
@@ -53,7 +55,7 @@ void SW_Runnable(void)
         {
             Counts[Index] = 0;
         }
-        if (Counts[Index] == 5)
+        if (Counts[Index] == SW_STABLE_THRESHOLD)
         {
             SW_PhysicalState[Index] = Curr;
             Counts[Index] = 0;

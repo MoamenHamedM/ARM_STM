@@ -25,7 +25,7 @@
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #pragma GCC diagnostic ignored "-Wreturn-type"
 
-void Runnable_APP1(void);
+void Runnable_LED_Toggle(void);
 
 #if APP == TEST_NVIC
 void delay_ms(u32_t ms)
@@ -36,7 +36,7 @@ void delay_ms(u32_t ms)
 }
 void EXTI0_IRQHandler(void)
 {
-  LED_SetState(LED_Alarm, LED_STATE_ON);
+  LED_SetState(LED_Toggle, LED_STATE_ON);
   // NVIC_CTRL_SetIRQPending(NVIC_IRQ_EXTI1);
   //  NVIC_CTRL_GenerateSWI(NVIC_IRQ_EXTI1);
   //  delay_ms(100);
@@ -45,7 +45,7 @@ void EXTI1_IRQHandler(void)
 {
   // NVIC_CTRL_GenerateSWI(NVIC_IRQ_EXTI0);
   NVIC_CTRL_GenerateSWI(NVIC_IRQ_EXTI0);
-  // LED_SetState(LED_Alarm, LED_STATE_OFF);
+  // LED_SetState(LED_Toggle, LED_STATE_OFF);
   // delay_ms(100);
 }
 
@@ -120,12 +120,12 @@ int main(int argc, char *argv[])
     }
     if (flag == 0)
     {
-      LED_SetState(LED_Alarm, LED_STATE_ON);
+      LED_SetState(LED_Toggle, LED_STATE_ON);
       flag = 1;
     }
     else if (flag == 1)
     {
-      LED_SetState(LED_Alarm, LED_STATE_OFF);
+      LED_SetState(LED_Toggle, LED_STATE_OFF);
       flag = 0;
     }
 
@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 #if APP == TEST_SYSTICK
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
   LED_Init();
-  SYSTICK_SET_CallBack(&Runnable_APP1);
+  SYSTICK_SET_CallBack(Runnable_LED_Toggle);
   SYSTICK_CTRL_Interrupt(SYSTICK_IRQ_ENABLE);
   SYSTICK_SET_CurrentVal(0);
   SYSTICK_CFG_CLKSource(SYSTICK_CLK_AHB);
@@ -170,6 +170,7 @@ int main(int argc, char *argv[])
 #endif
 #if APP == TEST_SCHD
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOB);
   LED_Init();
   SCH_CFG_SchedulerInit();
   SCH_CTRL_StartScheduler();
@@ -182,6 +183,3 @@ int main(int argc, char *argv[])
 #pragma GCC diagnostic pop
 
 // ----------------------------------------------------------------------------
-
-
-

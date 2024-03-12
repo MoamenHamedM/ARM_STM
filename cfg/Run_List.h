@@ -3,10 +3,10 @@
 
 typedef enum
 {
-  //  Sw_run,
-  APP1,
+  LedToggle,
   Sw_run,
-  APP2,
+  LedSWOnOff,
+  LED_StateMachine,
   _Run_Num
 } Run_t;
 

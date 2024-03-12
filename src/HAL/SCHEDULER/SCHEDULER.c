@@ -22,6 +22,7 @@ extern const Runnable_t Run_List[_Run_Num];
 /********************************************************************************************************/
 void TickCB(void);
 static void SCHD(void);
+extern void Runnable_LED_StateMachine(void);
 
 /********************************************************************************************************/
 /*********************************************APIs Implementation****************************************/
@@ -48,7 +49,7 @@ Error_Status SCH_CFG_SchedulerInit()
     Error_Status LOC_Status = Status_NOK;
     LOC_Status = SYSTICK_CTRL_Interrupt(SYSTICK_IRQ_ENABLE);
     LOC_Status = SYSTICK_SET_CurrentVal(0);
-    LOC_Status = SYSTICK_SET_CallBack(&TickCB);
+    LOC_Status = SYSTICK_SET_CallBack(TickCB);
     LOC_Status = SYSTICK_CFG_CLKSource(SYSTICK_CLK_AHB);
     LOC_Status = SYSTICK_SET_TimeTicksMs(TICK_TIME_MS);
     return LOC_Status;
@@ -63,6 +64,7 @@ static void SCHD(void)
     {
         if ((Run_List[Index].CB) && ((TimeStamp % Run_List[Index].periodMs) == 0))
         {
+            // Runnable_LED_StateMachine();
             Run_List[Index].CB();
         }
     }

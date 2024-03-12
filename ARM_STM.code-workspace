@@ -9,7 +9,8 @@
       "rcc_driver.h": "c",
       "led.h": "c",
       "systick_driver.h": "c",
-      "nvic_driver.h": "c"
+      "nvic_driver.h": "c",
+      "app1_3_statemachine": "c"
     }
   }
 }
