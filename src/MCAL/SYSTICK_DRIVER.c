@@ -98,7 +98,7 @@ Error_Status SYSTICK_SET_TimeTicksMs(u32_t TimeMs)
     else
     {
         LOC_Status = Status_OK;
-        LOC_LOAD = (TimeMs * SYSTICK_SRC_CLOCK / CONVERT_MS_TO_S_VAL) - 1;
+        LOC_LOAD = (SYSTICK_SRC_CLOCK / CONVERT_MS_TO_S_VAL * TimeMs) - 1;
         SYSTICK->LOAD = LOC_LOAD;
     }
 

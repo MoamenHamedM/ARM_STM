@@ -35,7 +35,7 @@ typedef struct
     volatile u32_t IABR[8];
     volatile u32_t Reserved5[56];
     volatile u32_t IPR[60];
-    volatile u32_t Reserved6[580];
+    volatile u32_t Reserved6[644];
     volatile u32_t STIR;
 } NVIC_t;
 
