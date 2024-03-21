@@ -22,7 +22,6 @@ extern const Runnable_t Run_List[_Run_Num];
 /********************************************************************************************************/
 void TickCB(void);
 static void SCHD(void);
-extern void Runnable_LED_StateMachine(void);
 
 /********************************************************************************************************/
 /*********************************************APIs Implementation****************************************/
@@ -64,7 +63,6 @@ static void SCHD(void)
     {
         if ((Run_List[Index].CB) && ((TimeStamp % Run_List[Index].periodMs) == 0))
         {
-            // Runnable_LED_StateMachine();
             Run_List[Index].CB();
         }
     }
