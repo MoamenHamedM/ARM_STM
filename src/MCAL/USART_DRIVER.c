@@ -172,7 +172,7 @@ Error_Status USART_GetByte(void *USART_Peri, u8_t *byte)
     return LOC_Status;
 }
 
-Error_Status USART_TXBufferAsync(void *USART_Peri, u8_t *buffer, u16_t length, TXCB CB)
+Error_Status USART_TXBufferAsyncZC(void *USART_Peri, u8_t *buffer, u16_t length, TXCB CB)
 {
     Error_Status LOC_Status = Status_NOK;
     u32_t LOC_USART_ADDRESS;
@@ -208,7 +208,7 @@ Error_Status USART_TXBufferAsync(void *USART_Peri, u8_t *buffer, u16_t length, T
     return LOC_Status;
 }
 
-Error_Status USART_RXBufferAsync(void *USART_Peri, u8_t *buffer, u16_t length, RXCB CB)
+Error_Status USART_RXBufferAsyncZC(void *USART_Peri, u8_t *buffer, u16_t length, RXCB CB)
 {
     Error_Status LOC_Status = Status_NOK;
     u32_t LOC_USART_ADDRESS;

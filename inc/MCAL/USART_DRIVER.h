@@ -87,7 +87,7 @@ Error_Status USART_GetByte(void *USART_Peri, u8_t *byte);
  * return:
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_USART_Busy_Buffer
  */
-Error_Status USART_TXBufferAsync(void *USART_Peri, u8_t *buffer, u16_t length, TXCB CB);
+Error_Status USART_TXBufferAsyncZC(void *USART_Peri, u8_t *buffer, u16_t length, TXCB CB);
 
 /*
  * use this function to recieve a buffer of bytes asynchronously through USART
@@ -100,6 +100,6 @@ Error_Status USART_TXBufferAsync(void *USART_Peri, u8_t *buffer, u16_t length, T
  * return:
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_USART_Busy_Buffer
  */
-Error_Status USART_RXBufferAsync(void *USART_Peri, u8_t *buffer, u16_t length, RXCB CB);
+Error_Status USART_RXBufferAsyncZC(void *USART_Peri, u8_t *buffer, u16_t length, RXCB CB);
 
 #endif // USART_DRIVER_
