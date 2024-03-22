@@ -2,5 +2,6 @@
 #define SYSTICK_CFG_
 
 #define SYSTICK_SRC_CLOCK 16000000
+#define TICK_TIME_MS 10
 
 #endif // SYSTICK_CFG_
