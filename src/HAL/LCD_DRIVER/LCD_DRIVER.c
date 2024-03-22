@@ -72,12 +72,12 @@ typedef struct
 /********************************************************************************************************/
 extern LCD_cfg_t LCDs_PinCfg;
 static u8_t LCD_State = LCD_STATE_OFF;
+static u8_t LCD_DigitCounter = 0;
 static User_Req_t User_Resquest[LCD_MAX_BUFFER_SIZE];
 static u8_t User_CurrentRequest = 0;
 static Write_Req_t Write_Request;
 static Clear_Req_t Clear_Request;
 static SetP_Req_t SetP_Request;
-
 /********************************************************************************************************/
 /*****************************************Static Functions Prototype*************************************/
 /********************************************************************************************************/
@@ -504,6 +504,25 @@ static void OperationState_WriteFunc()
             User_CurrentRequest = 0;
         }
 
+        LCD_DigitCounter++;
+
+        /*check if the current position is the end of the first line*/
+        if (LCD_DigitCounter == NUM_OF_DIGITS)
+        {
+            /*go to the beginning of the second line*/
+            LCD_SetCursorPositionAsync(1, 0, NULL);
+        }
+        /*check if the current position is the end of the second line*/
+        else if (LCD_DigitCounter == NUM_OF_DIGITS * 2)
+        {
+            /*go to the beginning of the first line*/
+            LCD_SetCursorPositionAsync(0, 0, NULL);
+        }
+        else
+        {
+            /*do nothing*/
+        }
+
         if (Write_Request.CallBack)
         {
             Write_Request.CallBack();
@@ -536,6 +555,8 @@ static void OperationState_ClearFunc()
         {
             User_CurrentRequest = 0;
         }
+
+        LCD_SetCursorPositionAsync(0, 0, NULL);
 
         if (Clear_Request.CallBack)
         {
@@ -576,6 +597,8 @@ static void OperationState_ClearFunc()
                 User_CurrentRequest = 0;
             }
             CommandState = 0;
+
+            LCD_SetCursorPositionAsync(0, 0, NULL);
 
             if (Clear_Request.CallBack)
             {
@@ -699,7 +722,24 @@ static void OperationState_SetPFunc()
     default:
         break;
     }
+
 #endif
+    LCD_DigitCounter = (SetP_Request.X_Position * 16) + SetP_Request.Y_Position;
+}
+
+Error_Status LCD_GetStatus(u8_t *Status)
+{
+    Error_Status LOC_Status = Status_NOK;
+
+    if (Status == NULL)
+    {
+        LOC_Status = Status_Null_Pointer;
+    }
+    else
+    {
+        *Status = LCD_State;
+    }
+    return LOC_Status;
 }
 
 void LCD_Runnable(void)

@@ -92,14 +92,6 @@ Error_Status LCD_InitAsync();
 Error_Status LCD_WriteStringAsync(u8_t *string, u8_t length, CallBack_t CB);
 
 /*
- * use this function to get the satsus of the lcd
- * Parameters:
- * Status -> address of the var to hold the state ->LCD_STATE_OFF, LCD_STATE_INIT, LCD_STATE_OPER
- * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
- */
-Error_Status LCD_GetStatus(u8_t *Status);
-
-/*
  * use this function to set the position of the lcd cursor
  * Parameters:
  * X_pos -> the desired x position
@@ -118,5 +110,13 @@ Error_Status LCD_SetCursorPositionAsync(u8_t X_pos, u8_t Y_pos, CallBack_t CB);
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input, Status_LCD_Full_Buffer
  */
 Error_Status LCD_ClearScreenAsync(CallBack_t CB);
+
+/*
+ * use this function to get the satsus of the lcd
+ * Parameters:
+ * Status -> address of the var to hold the state ->LCD_STATE_OFF, LCD_STATE_INIT, LCD_STATE_OPER
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
+ */
+Error_Status LCD_GetStatus(u8_t *Status);
 
 #endif // LCD_DRIVER_
