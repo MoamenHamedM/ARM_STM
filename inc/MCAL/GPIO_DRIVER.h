@@ -94,12 +94,13 @@ typedef struct
 /*
  * use this function to initialize a GPIO pin
  * parameters:
- * GPIO_Element -> the address of a struct of type GPIO_t
+ * GPIO_Element -> the address of an array of struct of type GPIO_t
  * you should configure the Pin, Port, Speed, Mode parameters in the struct
+ * length -> the length of the array
  * return:
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
  */
-Error_Status GPIO_Init(GPIO_Pin_t *GPIO_Element);
+Error_Status GPIO_Init(GPIO_Pin_t *GPIO_Element, u8_t length);
 
 /*
  * use this function to set a value to a GPIO pin

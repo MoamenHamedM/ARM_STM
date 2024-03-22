@@ -11,16 +11,16 @@ u8_t SW_PhysicalState[_SW_Num];
 Error_Status SW_Init()
 {
     Error_Status LOC_Status = Status_NOK;
-    GPIO_Pin_t Switch;
+    GPIO_Pin_t Switch[_SW_Num];
     u8_t index;
 
     for (index = 0; index < _SW_Num; index++)
     {
-        Switch.Pin = Switches[index].Pin;
-        Switch.Port = Switches[index].Port;
-        Switch.Mode = Switches[index].Direct;
-        LOC_Status = GPIO_Init(&Switch);
+        Switch[index].Pin = Switches[index].Pin;
+        Switch[index].Port = Switches[index].Port;
+        Switch[index].Mode = Switches[index].Direct;
     }
+    LOC_Status = GPIO_Init(Switch, _SW_Num);
     return LOC_Status;
 }
 

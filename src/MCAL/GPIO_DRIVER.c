@@ -33,48 +33,59 @@ typedef struct
   volatile u32_t AFRH;
 } GPIO_Port_t;
 
-Error_Status GPIO_Init(GPIO_Pin_t *GPIO_Element)
+Error_Status GPIO_Init(GPIO_Pin_t *GPIO_Element, u8_t length)
 {
   Error_Status LOC_Status = Status_NOK;
-  if (GPIO_Element == NULL || (GPIO_Port_t *)GPIO_Element->Port == NULL)
+  u8_t Index;
+  u32_t LOC_ModeValue,
+      LOC_TypeValue,
+      LOC_PUDNValue;
+  u32_t LOC_MODER_Value,
+      LOC_OTYPER_Value,
+      LOC_OSPEEDR_Value,
+      LOC_PUPDR_Value;
+  for (Index = 0; Index < length; Index++)
   {
-    LOC_Status = Status_Null_Pointer;
-  }
-  else if ((GPIO_Element->Mode > GPIO_MODE_AF_OD_PD) || (GPIO_Element->Pin > GPIO_PIN_15))
-  {
-    LOC_Status = Status_Invalid_Input;
-  }
-  else if ((GPIO_Element->Port > GPIO_PORT_C) || (GPIO_Element->Speed > GPIO_SPEED_VHIGH))
-  {
-    LOC_Status = Status_Invalid_Input;
-  }
-  else
-  {
-    LOC_Status = Status_OK;
+    if (GPIO_Element == NULL || (GPIO_Port_t *)(GPIO_Element[Index].Port) == NULL)
+    {
+      LOC_Status = Status_Null_Pointer;
+    }
+    else if ((GPIO_Element[Index].Mode > GPIO_MODE_AF_OD_PD) || (GPIO_Element[Index].Pin > GPIO_PIN_15))
+    {
+      LOC_Status = Status_Invalid_Input;
+    }
+    else if ((GPIO_Element[Index].Port > GPIO_PORT_C) || (GPIO_Element[Index].Speed > GPIO_SPEED_VHIGH))
+    {
+      LOC_Status = Status_Invalid_Input;
+    }
+    else
+    {
+      LOC_Status = Status_OK;
 
-    u32_t LOC_ModeValue = (GPIO_Element->Mode & GPIO_MODE_MASK);
-    u32_t LOC_TypeValue = (GPIO_Element->Mode & GPIO_TYPE_MASK) >> GPIO_TYPE_SHIFT;
-    u32_t LOC_PUDNValue = (GPIO_Element->Mode & GPIO_UP_DN_MASK) >> GPIO_UP_DN_SHIFT;
+      LOC_ModeValue = (GPIO_Element[Index].Mode & GPIO_MODE_MASK);
+      LOC_TypeValue = (GPIO_Element[Index].Mode & GPIO_TYPE_MASK) >> GPIO_TYPE_SHIFT;
+      LOC_PUDNValue = (GPIO_Element[Index].Mode & GPIO_UP_DN_MASK) >> GPIO_UP_DN_SHIFT;
 
-    u32_t LOC_MODER_Value = ((GPIO_Port_t *)GPIO_Element->Port)->MODER;
-    u32_t LOC_OTYPER_Value = ((GPIO_Port_t *)GPIO_Element->Port)->OTYPER;
-    u32_t LOC_OSPEEDR_Value = ((GPIO_Port_t *)GPIO_Element->Port)->OSPEEDR;
-    u32_t LOC_PUPDR_Value = ((GPIO_Port_t *)GPIO_Element->Port)->PUPDR;
+      LOC_MODER_Value = ((GPIO_Port_t *)(GPIO_Element[Index].Port))->MODER;
+      LOC_OTYPER_Value = ((GPIO_Port_t *)(GPIO_Element[Index].Port))->OTYPER;
+      LOC_OSPEEDR_Value = ((GPIO_Port_t *)(GPIO_Element[Index].Port))->OSPEEDR;
+      LOC_PUPDR_Value = ((GPIO_Port_t *)(GPIO_Element[Index].Port))->PUPDR;
 
-    LOC_MODER_Value &= ~(GPIO_CLEAR_MASK << (GPIO_2BIT_OFFSET * GPIO_Element->Pin));
-    LOC_OTYPER_Value &= ~(GPIO_1BIT_OFFSET << (GPIO_Element->Pin));
-    LOC_OSPEEDR_Value &= ~(GPIO_CLEAR_MASK << (GPIO_2BIT_OFFSET * GPIO_Element->Pin));
-    LOC_PUPDR_Value &= ~(GPIO_CLEAR_MASK << (GPIO_2BIT_OFFSET * GPIO_Element->Pin));
+      LOC_MODER_Value &= ~(GPIO_CLEAR_MASK << (GPIO_2BIT_OFFSET * GPIO_Element[Index].Pin));
+      LOC_OTYPER_Value &= ~(GPIO_1BIT_OFFSET << (GPIO_Element[Index].Pin));
+      LOC_OSPEEDR_Value &= ~(GPIO_CLEAR_MASK << (GPIO_2BIT_OFFSET * GPIO_Element[Index].Pin));
+      LOC_PUPDR_Value &= ~(GPIO_CLEAR_MASK << (GPIO_2BIT_OFFSET * GPIO_Element[Index].Pin));
 
-    LOC_MODER_Value |= (LOC_ModeValue << (GPIO_2BIT_OFFSET * GPIO_Element->Pin));
-    LOC_OTYPER_Value |= (LOC_TypeValue << (GPIO_Element->Pin));
-    LOC_OSPEEDR_Value |= (GPIO_Element->Speed << (GPIO_2BIT_OFFSET * GPIO_Element->Pin));
-    LOC_PUPDR_Value |= (LOC_PUDNValue << (GPIO_2BIT_OFFSET * GPIO_Element->Pin));
+      LOC_MODER_Value |= (LOC_ModeValue << (GPIO_2BIT_OFFSET * GPIO_Element[Index].Pin));
+      LOC_OTYPER_Value |= (LOC_TypeValue << (GPIO_Element[Index].Pin));
+      LOC_OSPEEDR_Value |= (GPIO_Element->Speed << (GPIO_2BIT_OFFSET * GPIO_Element[Index].Pin));
+      LOC_PUPDR_Value |= (LOC_PUDNValue << (GPIO_2BIT_OFFSET * GPIO_Element[Index].Pin));
 
-    ((GPIO_Port_t *)GPIO_Element->Port)->MODER = LOC_MODER_Value;
-    ((GPIO_Port_t *)GPIO_Element->Port)->OTYPER = LOC_OTYPER_Value;
-    ((GPIO_Port_t *)GPIO_Element->Port)->OSPEEDR = LOC_OSPEEDR_Value;
-    ((GPIO_Port_t *)GPIO_Element->Port)->PUPDR = LOC_PUPDR_Value;
+      ((GPIO_Port_t *)(GPIO_Element[Index].Port))->MODER = LOC_MODER_Value;
+      ((GPIO_Port_t *)(GPIO_Element[Index].Port))->OTYPER = LOC_OTYPER_Value;
+      ((GPIO_Port_t *)(GPIO_Element[Index].Port))->OSPEEDR = LOC_OSPEEDR_Value;
+      ((GPIO_Port_t *)(GPIO_Element[Index].Port))->PUPDR = LOC_PUPDR_Value;
+    }
   }
   return LOC_Status;
 }

@@ -8,17 +8,17 @@ extern const LED_cfg_t Leds[_LED_Num];
 Error_Status LED_Init()
 {
     Error_Status LOC_Status = Status_NOK;
-    GPIO_Pin_t Led;
+    GPIO_Pin_t Led[_LED_Num];
     u8_t index;
-    Led.Mode = GPIO_MODE_OP_PP;
-    Led.Speed = GPIO_SPEED_HIGH;
 
     for (index = 0; index < _LED_Num; index++)
     {
-        Led.Pin = Leds[index].Pin;
-        Led.Port = Leds[index].Port;
-        LOC_Status = GPIO_Init(&Led);
+        Led[index].Pin = Leds[index].Pin;
+        Led[index].Port = Leds[index].Port;
+        Led[index].Mode = GPIO_MODE_OP_PP;
+        Led[index].Speed = GPIO_SPEED_HIGH;
     }
+    LOC_Status = GPIO_Init(Led, _LED_Num);
     return LOC_Status;
 }
 

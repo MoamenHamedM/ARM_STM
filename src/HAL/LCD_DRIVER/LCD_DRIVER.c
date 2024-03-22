@@ -7,6 +7,7 @@
 /********************************************************************************************************/
 /************************************************Defines*************************************************/
 /********************************************************************************************************/
+#define LCD_TOTAL_PINS_NUM NUMBER_OF_DATA_LINES + 3
 #define LCD_USER_STATE_BUSY 0
 #define LCD_USER_STATE_READY 1
 #define LCD_REQ_TYPE_WRITE 0
@@ -76,34 +77,32 @@ static void OperationState_SetPFunc();
 Error_Status LCD_InitAsync()
 {
     Error_Status LOC_Status = Status_NOK;
-    GPIO_Pin_t LcdPins;
-    u8_t LCD_Pin_Index;
+    GPIO_Pin_t LcdPins[LCD_TOTAL_PINS_NUM];
+    u8_t Index;
 
-    for (LCD_Pin_Index = 0; LCD_Pin_Index < NUMBER_OF_DATA_LINES; LCD_Pin_Index++)
+    for (Index = 0; Index < NUMBER_OF_DATA_LINES; Index++)
     {
-        LcdPins.Pin = LCDs_PinCfg.LCD_data_pins[LCD_Pin_Index].Pin;
-        LcdPins.Port = LCDs_PinCfg.LCD_data_pins[LCD_Pin_Index].Port;
-        LcdPins.Mode = GPIO_MODE_OP_PP;
-        LcdPins.Speed = GPIO_SPEED_MED;
-        LOC_Status = GPIO_Init(&LcdPins);
+        LcdPins[Index].Pin = LCDs_PinCfg.LCD_data_pins[Index].Pin;
+        LcdPins[Index].Port = LCDs_PinCfg.LCD_data_pins[Index].Port;
+        LcdPins[Index].Mode = GPIO_MODE_OP_PP;
+        LcdPins[Index].Speed = GPIO_SPEED_MED;
     }
-    LcdPins.Pin = LCDs_PinCfg.E_pin.Pin;
-    LcdPins.Port = LCDs_PinCfg.E_pin.Port;
-    LcdPins.Mode = GPIO_MODE_OP_PP;
-    LcdPins.Speed = GPIO_SPEED_MED;
-    LOC_Status = GPIO_Init(&LcdPins);
+    LcdPins[NUMBER_OF_DATA_LINES].Pin = LCDs_PinCfg.E_pin.Pin;
+    LcdPins[NUMBER_OF_DATA_LINES].Port = LCDs_PinCfg.E_pin.Port;
+    LcdPins[NUMBER_OF_DATA_LINES].Mode = GPIO_MODE_OP_PP;
+    LcdPins[NUMBER_OF_DATA_LINES].Speed = GPIO_SPEED_MED;
 
-    LcdPins.Pin = LCDs_PinCfg.R_S_pin.Pin;
-    LcdPins.Port = LCDs_PinCfg.R_S_pin.Port;
-    LcdPins.Mode = GPIO_MODE_OP_PP;
-    LcdPins.Speed = GPIO_SPEED_MED;
-    LOC_Status = GPIO_Init(&LcdPins);
+    LcdPins[NUMBER_OF_DATA_LINES + 1].Pin = LCDs_PinCfg.R_S_pin.Pin;
+    LcdPins[NUMBER_OF_DATA_LINES + 1].Port = LCDs_PinCfg.R_S_pin.Port;
+    LcdPins[NUMBER_OF_DATA_LINES + 1].Mode = GPIO_MODE_OP_PP;
+    LcdPins[NUMBER_OF_DATA_LINES + 1].Speed = GPIO_SPEED_MED;
 
-    LcdPins.Pin = LCDs_PinCfg.R_W_pin.Pin;
-    LcdPins.Port = LCDs_PinCfg.R_W_pin.Port;
-    LcdPins.Mode = GPIO_MODE_OP_PP;
-    LcdPins.Speed = GPIO_SPEED_MED;
-    LOC_Status = GPIO_Init(&LcdPins);
+    LcdPins[NUMBER_OF_DATA_LINES + 2].Pin = LCDs_PinCfg.R_W_pin.Pin;
+    LcdPins[NUMBER_OF_DATA_LINES + 2].Port = LCDs_PinCfg.R_W_pin.Port;
+    LcdPins[NUMBER_OF_DATA_LINES + 2].Mode = GPIO_MODE_OP_PP;
+    LcdPins[NUMBER_OF_DATA_LINES + 2].Speed = GPIO_SPEED_MED;
+
+    LOC_Status = GPIO_Init(LcdPins, LCD_TOTAL_PINS_NUM);
 
     LCD_State = LCD_STATE_INIT;
     return LOC_Status;
