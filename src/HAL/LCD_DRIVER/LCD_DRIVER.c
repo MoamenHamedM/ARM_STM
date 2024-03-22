@@ -21,6 +21,23 @@
 #define WRITE_COMMAND_STATE 0
 #define WRITE_DATA_STATE 1
 
+#define LCD_8_PIN_COMMAND_FUNC_SET 0x30
+#define LCD_8_PIN_COMMAND_ONOFF 0x08
+#define LCD_8_PIN_COMMAND_CLEAR 0x01
+#define LCD_8_PIN_COMMAND_ENTRY 0x04
+#define LCD_4_PIN_COMMAND_1_ST_FUNC_SET 0x02
+#define LCD_4_PIN_COMMAND_2_ND_FUNC_SET 0x20
+#define LCD_4_PIN_COMMAND_ONOFF 0x00
+#define LCD_4_PIN_COMMAND_CLEAR 0x01
+#define LCD_4_PIN_COMMAND_ENTRY 0x00
+#define LCD_COMMAND_GOTOXY 128
+#define LCD_SECOND_LINE_OFFSET 0x40
+
+#define LCD_1_BIT_OFFSET 1
+#define LCD_2_BIT_OFFSET 2
+#define LCD_3_BIT_OFFSET 3
+#define LCD_4_BIT_OFFSET 4
+
 /********************************************************************************************************/
 /************************************************Types***************************************************/
 /********************************************************************************************************/
@@ -198,23 +215,23 @@ static void Init_State_Func()
     static u8_t Init_Time_Stamp = 0;
 
 #if NUMBER_OF_DATA_LINES == DATA_8_PINS
-    u8_t LOC_FunctionSetCommand = 0x30;  /*variable to represent the function set command*/
-    u8_t LOC_DisplayOnOffCommand = 0x08; /*variable to represent the display on/off command*/
-    u8_t LOC_DisplayClearCommand = 0x01; /*variable to represent the display clear command*/
-    u8_t LOC_EntryModeCommand = 0x04;    /*variable to represent the entry mode set command*/
+    u8_t LOC_FunctionSetCommand = LCD_8_PIN_COMMAND_FUNC_SET;
+    u8_t LOC_DisplayOnOffCommand = LCD_8_PIN_COMMAND_ONOFF;
+    u8_t LOC_DisplayClearCommand = LCD_8_PIN_COMMAND_CLEAR;
+    u8_t LOC_EntryModeCommand = LCD_8_PIN_COMMAND_ENTRY;
 
     /*set the font and number of lines configuration to the command*/
-    LOC_FunctionSetCommand |= (FONT_SIZE << 2);
-    LOC_FunctionSetCommand |= (NUMBER_OF_LINES << 3);
+    LOC_FunctionSetCommand |= (FONT_SIZE << LCD_2_BIT_OFFSET);
+    LOC_FunctionSetCommand |= (NUMBER_OF_LINES << LCD_3_BIT_OFFSET);
 
     /*set the blink, cursor and display state configuration to the command*/
     LOC_DisplayOnOffCommand |= (BLINK_STATE);
-    LOC_DisplayOnOffCommand |= (CUSOR_STATE << 1);
-    LOC_DisplayOnOffCommand |= (DISPLAY_STATE << 2);
+    LOC_DisplayOnOffCommand |= (CUSOR_STATE << LCD_1_BIT_OFFSET);
+    LOC_DisplayOnOffCommand |= (DISPLAY_STATE << LCD_2_BIT_OFFSET);
 
     /*set the font and number of lines configuration to the command*/
     LOC_EntryModeCommand |= (SHIFT_STATE);
-    LOC_EntryModeCommand |= (INCREMENT_STATE << 1);
+    LOC_EntryModeCommand |= (INCREMENT_STATE << LCD_1_BIT_OFFSET);
 
     if (Init_Time_Stamp < 2)
     {
@@ -253,10 +270,10 @@ static void Init_State_Func()
 
 #if NUMBER_OF_DATA_LINES == DATA_4_PINS
 
-    u8_t LOC_FunctionSetCommand = 0x02;  /*variable to represent the function set command*/
-    u8_t LOC_DisplayOnOffCommand = 0x00; /*variable to represent the display on/off command*/
-    u8_t LOC_DisplayClearCommand = 0x01; /*variable to represent the display clear command*/
-    u8_t LOC_EntryModeCommand = 0x00;    /*variable to represent the entry mode set command*/
+    u8_t LOC_FunctionSetCommand = LCD_4_PIN_COMMAND_1_ST_FUNC_SET;
+    u8_t LOC_DisplayOnOffCommand = LCD_4_PIN_COMMAND_ONOFF;
+    u8_t LOC_DisplayClearCommand = LCD_4_PIN_COMMAND_CLEAR;
+    u8_t LOC_EntryModeCommand = LCD_4_PIN_COMMAND_ENTRY;
 
     /********************************** call the function set command **********************************/
     if (Init_Time_Stamp < 4)
@@ -269,9 +286,9 @@ static void Init_State_Func()
     if (Init_Time_Stamp < 8)
     {
         /*set the font and number of lines configuration to the command*/
-        LOC_FunctionSetCommand = 0x20;
-        LOC_FunctionSetCommand |= (FONT_SIZE << 2);
-        LOC_FunctionSetCommand |= (NUMBER_OF_LINES << 3);
+        LOC_FunctionSetCommand = LCD_4_PIN_COMMAND_2_ND_FUNC_SET;
+        LOC_FunctionSetCommand |= (FONT_SIZE << LCD_2_BIT_OFFSET);
+        LOC_FunctionSetCommand |= (NUMBER_OF_LINES << LCD_3_BIT_OFFSET);
 
         /*second call of the function set command*/
         LCD_WriteToPins(LOC_FunctionSetCommand, WRITE_COMMAND_STATE);
@@ -281,11 +298,11 @@ static void Init_State_Func()
     {
         /*set the blink, cursor and display state configuration to the command*/
         LOC_DisplayOnOffCommand |= (BLINK_STATE);
-        LOC_DisplayOnOffCommand |= (CUSOR_STATE << 1);
-        LOC_DisplayOnOffCommand |= (DISPLAY_STATE << 2);
+        LOC_DisplayOnOffCommand |= (CUSOR_STATE << LCD_1_BIT_OFFSET);
+        LOC_DisplayOnOffCommand |= (DISPLAY_STATE << LCD_2_BIT_OFFSET);
 
         /*setting the DB7 bit to high*/
-        LOC_DisplayOnOffCommand |= (1 << 3);
+        LOC_DisplayOnOffCommand |= (1 << LCD_3_BIT_OFFSET);
 
         /*call of the display on/off command*/
         LCD_WriteToPins(LOC_DisplayOnOffCommand, WRITE_COMMAND_STATE);
@@ -301,7 +318,7 @@ static void Init_State_Func()
     {
         /*set the font and number of lines configuration to the command*/
         LOC_EntryModeCommand |= (SHIFT_STATE);
-        LOC_EntryModeCommand |= (INCREMENT_STATE << 1);
+        LOC_EntryModeCommand |= (INCREMENT_STATE << LCD_1_BIT_OFFSET);
 
         /*call of the entry mode set command*/
         LCD_WriteToPins(LOC_EntryModeCommand, WRITE_COMMAND_STATE);
@@ -362,7 +379,7 @@ static void LCD_WriteToPins(u8_t Info, u8_t State)
             {
                 GPIO_Set_PinValue(LCDs_PinCfg.LCD_data_pins[Index].Port,
                                   LCDs_PinCfg.LCD_data_pins[Index].Pin,
-                                  ((Info >> (Index + 4)) & 1));
+                                  ((Info >> (Index + LCD_4_BIT_OFFSET)) & 1));
             }
             GPIO_Set_PinValue(LCDs_PinCfg.E_pin.Port, LCDs_PinCfg.E_pin.Pin, GPIO_STATE_SET);
             Command_State = STATIC_STATE_BUSY;
@@ -416,6 +433,10 @@ static void LCD_WriteToPins(u8_t Info, u8_t State)
 static void OperationState_WriteFunc()
 {
     static u8_t write_state = STATIC_STATE_READY;
+#if NUMBER_OF_DATA_LINES == DATA_4_PINS
+    static u8_t CommandState = 0;
+#endif
+#if NUMBER_OF_DATA_LINES == DATA_8_PINS
 
     if (Write_Request.Curr_Pos < User_Resquest[User_CurrentRequest].U_length)
     {
@@ -435,6 +456,43 @@ static void OperationState_WriteFunc()
             break;
         }
     }
+#endif
+#if NUMBER_OF_DATA_LINES == DATA_4_PINS
+    if (Write_Request.Curr_Pos < User_Resquest[User_CurrentRequest].U_length)
+    {
+        switch (write_state)
+        {
+        case STATIC_STATE_READY:
+            LCD_WriteToPins(*(User_Resquest[User_CurrentRequest].U_string + Write_Request.Curr_Pos), WRITE_DATA_STATE);
+            if (CommandState)
+            {
+                write_state = STATIC_STATE_BUSY;
+                CommandState = 0;
+            }
+            else
+            {
+                CommandState++;
+            }
+            break;
+        case STATIC_STATE_BUSY:
+            LCD_WriteToPins(*(User_Resquest[User_CurrentRequest].U_string + Write_Request.Curr_Pos), WRITE_DATA_STATE);
+            if (CommandState)
+            {
+                write_state = STATIC_STATE_READY;
+                Write_Request.Curr_Pos++;
+                CommandState = 0;
+            }
+            else
+            {
+                CommandState++;
+            }
+            break;
+
+        default:
+            break;
+        }
+    }
+#endif
     else
     {
         User_Resquest[User_CurrentRequest].U_State = LCD_USER_STATE_READY;
@@ -456,7 +514,11 @@ static void OperationState_WriteFunc()
 static void OperationState_ClearFunc()
 {
     static u8_t Clear_state = STATIC_STATE_READY;
-    u8_t LOC_DisplayClearCommand = 0x01; /*variable to represent the display clear command*/
+    u8_t LOC_DisplayClearCommand = LCD_8_PIN_COMMAND_CLEAR;
+#if NUMBER_OF_DATA_LINES == DATA_4_PINS
+    static u8_t CommandState = 0;
+#endif
+#if NUMBER_OF_DATA_LINES == DATA_8_PINS
 
     switch (Clear_state)
     {
@@ -484,12 +546,62 @@ static void OperationState_ClearFunc()
     default:
         break;
     }
+#endif
+#if NUMBER_OF_DATA_LINES == DATA_4_PINS
+
+    switch (Clear_state)
+    {
+    case STATIC_STATE_READY:
+        if (CommandState)
+        {
+            LCD_WriteToPins(LOC_DisplayClearCommand, WRITE_COMMAND_STATE);
+            Clear_state = STATIC_STATE_BUSY;
+            CommandState = 0;
+        }
+        else
+        {
+            CommandState++;
+        }
+        break;
+    case STATIC_STATE_BUSY:
+        if (CommandState)
+        {
+            LCD_WriteToPins(LOC_DisplayClearCommand, WRITE_COMMAND_STATE);
+            Clear_state = STATIC_STATE_READY;
+            User_Resquest[User_CurrentRequest].U_State = LCD_USER_STATE_READY;
+
+            User_CurrentRequest++;
+            if (User_Resquest[User_CurrentRequest].U_State == LCD_USER_STATE_READY || User_CurrentRequest == LCD_MAX_BUFFER_SIZE)
+            {
+                User_CurrentRequest = 0;
+            }
+            CommandState = 0;
+
+            if (Clear_Request.CallBack)
+            {
+                Clear_Request.CallBack();
+            }
+        }
+        else
+        {
+            CommandState++;
+        }
+        break;
+
+    default:
+        break;
+    }
+#endif
 }
 
 static void OperationState_SetPFunc()
 {
     static u8_t SetPState = STATIC_STATE_READY;
-    u8_t LOC_Location = 128; /*variable to represent the value to execute GotoDDRAM_XY command*/
+    u8_t LOC_Location = LCD_COMMAND_GOTOXY;
+#if NUMBER_OF_DATA_LINES == DATA_4_PINS
+    static u8_t CommandState = 0;
+#endif
+#if NUMBER_OF_DATA_LINES == DATA_8_PINS
 
     /*check if the location is in the first line*/
     if (SetP_Request.X_Position == 0)
@@ -498,7 +610,7 @@ static void OperationState_SetPFunc()
     }
     else
     {
-        LOC_Location += (SetP_Request.Y_Position + 0x40);
+        LOC_Location += (SetP_Request.Y_Position + LCD_SECOND_LINE_OFFSET);
     }
 
     switch (SetPState)
@@ -529,6 +641,65 @@ static void OperationState_SetPFunc()
     default:
         break;
     }
+#endif
+
+#if NUMBER_OF_DATA_LINES == DATA_4_PINS
+
+    /*check if the location is in the first line*/
+    if (SetP_Request.X_Position == 0)
+    {
+        LOC_Location += SetP_Request.Y_Position;
+    }
+    else
+    {
+        LOC_Location += (SetP_Request.Y_Position + LCD_SECOND_LINE_OFFSET);
+    }
+
+    switch (SetPState)
+    {
+    case STATIC_STATE_READY:
+        if (CommandState)
+        {
+            LCD_WriteToPins(LOC_Location, WRITE_COMMAND_STATE);
+            SetPState = STATIC_STATE_BUSY;
+            CommandState = 0;
+        }
+        else
+        {
+            CommandState++;
+        }
+        break;
+    case STATIC_STATE_BUSY:
+        if (CommandState)
+        {
+            LCD_WriteToPins(LOC_Location, WRITE_COMMAND_STATE);
+            SetP_Request.X_Position = 0;
+            SetP_Request.Y_Position = 0;
+            SetPState = STATIC_STATE_READY;
+            User_Resquest[User_CurrentRequest].U_State = LCD_USER_STATE_READY;
+
+            User_CurrentRequest++;
+            if (User_Resquest[User_CurrentRequest].U_State == LCD_USER_STATE_READY || User_CurrentRequest == LCD_MAX_BUFFER_SIZE)
+            {
+                User_CurrentRequest = 0;
+            }
+            CommandState = 0;
+
+            if (SetP_Request.CallBack)
+            {
+                SetP_Request.CallBack();
+            }
+        }
+        else
+        {
+            CommandState++;
+        }
+        break;
+
+    default:
+        break;
+    }
+#endif
 }
 
 void LCD_Runnable(void)

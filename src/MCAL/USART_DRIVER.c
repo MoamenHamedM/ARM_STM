@@ -283,16 +283,16 @@ void USART1_IRQHandler(void)
 
 void USART2_IRQHandler(void)
 {
-    if (((USART_Peri_t *)((u32_t)USART_Peri_2 & USART_PERI_INDEX_FLAG))->SR & USART_TX_DONE_IRQ)
+    if (((USART_Peri_t *)((u32_t)USART_Peri_2 & ~USART_PERI_INDEX_FLAG))->SR & USART_TX_DONE_IRQ)
     {
         if (TX_Request[USART_2_INDEX].buffer.pos < TX_Request[USART_2_INDEX].buffer.size)
         {
-            ((USART_Peri_t *)((u32_t)USART_Peri_2 & USART_PERI_INDEX_FLAG))->DR = TX_Request[USART_2_INDEX].buffer.data[TX_Request[USART_2_INDEX].buffer.pos];
+            ((USART_Peri_t *)((u32_t)USART_Peri_2 & ~USART_PERI_INDEX_FLAG))->DR = TX_Request[USART_2_INDEX].buffer.data[TX_Request[USART_2_INDEX].buffer.pos];
             TX_Request[USART_2_INDEX].buffer.pos++;
         }
         else
         {
-            ((USART_Peri_t *)((u32_t)USART_Peri_2 & USART_PERI_INDEX_FLAG))->CR1 &= ~USART_TX_ENABLE_FLAG;
+            ((USART_Peri_t *)((u32_t)USART_Peri_2 & ~USART_PERI_INDEX_FLAG))->CR1 &= ~USART_TX_ENABLE_FLAG;
             TX_Request[USART_2_INDEX].state = USART_ASYNC_REQ_STATE_READY;
             if (TX_Request[USART_2_INDEX].CallBack)
             {
@@ -301,16 +301,16 @@ void USART2_IRQHandler(void)
         }
     }
 
-    if (((USART_Peri_t *)((u32_t)USART_Peri_2 & USART_PERI_INDEX_FLAG))->SR & USART_RX_DONE_IRQ)
+    if (((USART_Peri_t *)((u32_t)USART_Peri_2 & ~USART_PERI_INDEX_FLAG))->SR & USART_RX_DONE_IRQ)
     {
         if (RX_Request[USART_2_INDEX].buffer.pos < RX_Request[USART_2_INDEX].buffer.size)
         {
-            RX_Request[USART_2_INDEX].buffer.data[RX_Request[USART_2_INDEX].buffer.pos] = ((USART_Peri_t *)((u32_t)USART_Peri_2 & USART_PERI_INDEX_FLAG))->DR;
+            RX_Request[USART_2_INDEX].buffer.data[RX_Request[USART_2_INDEX].buffer.pos] = ((USART_Peri_t *)((u32_t)USART_Peri_2 & ~USART_PERI_INDEX_FLAG))->DR;
             RX_Request[USART_2_INDEX].buffer.pos++;
         }
         else
         {
-            ((USART_Peri_t *)((u32_t)USART_Peri_2 & USART_PERI_INDEX_FLAG))->CR1 &= ~USART_RX_ENABLE_FLAG;
+            ((USART_Peri_t *)((u32_t)USART_Peri_2 & ~USART_PERI_INDEX_FLAG))->CR1 &= ~USART_RX_ENABLE_FLAG;
             RX_Request[USART_2_INDEX].state = USART_ASYNC_REQ_STATE_READY;
             if (RX_Request[USART_2_INDEX].CallBack)
             {
@@ -322,16 +322,16 @@ void USART2_IRQHandler(void)
 
 void USART6_IRQHandler(void)
 {
-    if (((USART_Peri_t *)((u32_t)USART_Peri_6 & USART_PERI_INDEX_FLAG))->SR & USART_TX_DONE_IRQ)
+    if (((USART_Peri_t *)((u32_t)USART_Peri_6 & ~USART_PERI_INDEX_FLAG))->SR & USART_TX_DONE_IRQ)
     {
         if (TX_Request[USART_6_INDEX].buffer.pos < TX_Request[USART_6_INDEX].buffer.size)
         {
-            ((USART_Peri_t *)((u32_t)USART_Peri_6 & USART_PERI_INDEX_FLAG))->DR = TX_Request[USART_6_INDEX].buffer.data[TX_Request[USART_6_INDEX].buffer.pos];
+            ((USART_Peri_t *)((u32_t)USART_Peri_6 & ~USART_PERI_INDEX_FLAG))->DR = TX_Request[USART_6_INDEX].buffer.data[TX_Request[USART_6_INDEX].buffer.pos];
             TX_Request[USART_6_INDEX].buffer.pos++;
         }
         else
         {
-            ((USART_Peri_t *)((u32_t)USART_Peri_6 & USART_PERI_INDEX_FLAG))->CR1 &= ~USART_TX_ENABLE_FLAG;
+            ((USART_Peri_t *)((u32_t)USART_Peri_6 & ~USART_PERI_INDEX_FLAG))->CR1 &= ~USART_TX_ENABLE_FLAG;
             TX_Request[USART_6_INDEX].state = USART_ASYNC_REQ_STATE_READY;
             if (TX_Request[USART_6_INDEX].CallBack)
             {
@@ -340,16 +340,16 @@ void USART6_IRQHandler(void)
         }
     }
 
-    if (((USART_Peri_t *)((u32_t)USART_Peri_6 & USART_PERI_INDEX_FLAG))->SR & USART_RX_DONE_IRQ)
+    if (((USART_Peri_t *)((u32_t)USART_Peri_6 & ~USART_PERI_INDEX_FLAG))->SR & USART_RX_DONE_IRQ)
     {
         if (RX_Request[USART_6_INDEX].buffer.pos < RX_Request[USART_6_INDEX].buffer.size)
         {
-            RX_Request[USART_6_INDEX].buffer.data[RX_Request[USART_6_INDEX].buffer.pos] = ((USART_Peri_t *)((u32_t)USART_Peri_6 & USART_PERI_INDEX_FLAG))->DR;
+            RX_Request[USART_6_INDEX].buffer.data[RX_Request[USART_6_INDEX].buffer.pos] = ((USART_Peri_t *)((u32_t)USART_Peri_6 & ~USART_PERI_INDEX_FLAG))->DR;
             RX_Request[USART_6_INDEX].buffer.pos++;
         }
         else
         {
-            ((USART_Peri_t *)((u32_t)USART_Peri_6 & USART_PERI_INDEX_FLAG))->CR1 &= ~USART_RX_ENABLE_FLAG;
+            ((USART_Peri_t *)((u32_t)USART_Peri_6 & ~USART_PERI_INDEX_FLAG))->CR1 &= ~USART_RX_ENABLE_FLAG;
             RX_Request[USART_6_INDEX].state = USART_ASYNC_REQ_STATE_READY;
             if (RX_Request[USART_6_INDEX].CallBack)
             {
