@@ -25,7 +25,7 @@
 /********************************************************************************************************/
 typedef struct
 {
-    const char *U_string;
+    const u8_t *U_string;
     u8_t U_length;
     u8_t U_State;
     u8_t U_Type;
@@ -77,7 +77,7 @@ Error_Status LCD_InitAsync()
 {
     Error_Status LOC_Status = Status_NOK;
     GPIO_Pin_t LcdPins;
-    u8_t LCD_Index, LCD_Pin_Index;
+    u8_t LCD_Pin_Index;
 
     for (LCD_Pin_Index = 0; LCD_Pin_Index < NUMBER_OF_DATA_LINES; LCD_Pin_Index++)
     {
@@ -423,11 +423,11 @@ static void OperationState_WriteFunc()
         switch (write_state)
         {
         case STATIC_STATE_READY:
-            LCD_WriteToPins(User_Resquest[User_CurrentRequest].U_string + Write_Request.Curr_Pos, WRITE_DATA_STATE);
+            LCD_WriteToPins(*(User_Resquest[User_CurrentRequest].U_string + Write_Request.Curr_Pos), WRITE_DATA_STATE);
             write_state = STATIC_STATE_BUSY;
             break;
         case STATIC_STATE_BUSY:
-            LCD_WriteToPins(User_Resquest[User_CurrentRequest].U_string + Write_Request.Curr_Pos, WRITE_DATA_STATE);
+            LCD_WriteToPins(*(User_Resquest[User_CurrentRequest].U_string + Write_Request.Curr_Pos), WRITE_DATA_STATE);
             write_state = STATIC_STATE_READY;
             Write_Request.Curr_Pos++;
             break;

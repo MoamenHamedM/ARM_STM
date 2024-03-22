@@ -16,7 +16,9 @@ typedef enum
     Status_OK,
     Status_Null_Pointer,
     Status_Invalid_Input,
-    Status_LCD_Full_Buffer
+    Status_LCD_Full_Buffer,
+    Status_USART_TimeOut,
+    Status_USART_Busy_Buffer
 } Error_Status;
 
 typedef signed char s8_t;
@@ -28,4 +30,4 @@ typedef unsigned int u32_t;
 typedef float f32_t;
 typedef double f64_t;
 
-#endif /* STD_TYPES_H_ */
+#endif
