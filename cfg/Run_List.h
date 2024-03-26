@@ -3,10 +3,7 @@
 
 typedef enum
 {
-  LedToggle,
-  Sw_run,
-  LedSWOnOff,
-  LED_StateMachine,
+  LCD_RUN,
   _Run_Num
 } Run_t;
 

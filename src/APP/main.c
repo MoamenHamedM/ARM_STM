@@ -7,6 +7,7 @@
 #include "HAL/CLOCK_HANDLER.h"
 #include "MCAL/SYSTICK_DRIVER.h"
 #include "HAL/SCHEDULER.h"
+#include "HAL/LCD_DRIVER.h"
 
 #define TEST_RCC 0
 #define TEST_GPIO 1
@@ -14,7 +15,8 @@
 #define TEST_NVIC 3
 #define TEST_SYSTICK 4
 #define TEST_SCHD 5
-#define APP TEST_SCHD
+#define TEST_LCD 6
+#define APP TEST_LCD
 
 // ----- main() ---------------------------------------------------------------
 
@@ -26,6 +28,7 @@
 #pragma GCC diagnostic ignored "-Wreturn-type"
 
 void Runnable_LED_Toggle(void);
+void LCD_Write();
 
 #if APP == TEST_NVIC
 void delay_ms(u32_t ms)
@@ -177,9 +180,34 @@ int main(int argc, char *argv[])
 
 #endif
 
+#if APP == TEST_LCD
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
+  LED_Init();
+  LCD_InitAsync();
+  SCH_CFG_SchedulerInit();
+  LCD_Write();
+  SCH_CTRL_StartScheduler();
+
+#endif
+
   return 0;
 }
 
 #pragma GCC diagnostic pop
 
 // ----------------------------------------------------------------------------
+
+void Led_On()
+{
+  LED_SetState(LED_Toggle, LED_STATE_ON);
+}
+
+void LCD_Write()
+{
+  LCD_WriteStringAsync("hello", 5, NULL);
+  LCD_SetCursorPositionAsync(0, 6, NULL);
+ // LCD_WriteStringAsync("hello", 5, NULL);
+ // LCD_SetCursorPositionAsync(1, 6, NULL);
+
+  LCD_WriteStringAsync("hello", 5, Led_On);
+}

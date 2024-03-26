@@ -1,4 +1,5 @@
 
+#if 0
 #include "HAL/LED.h"
 #include "HAL/SW.h"
 
@@ -16,3 +17,4 @@ void Runnable_LED_SW_ON_OFF(void)
         LED_SetState(LED_SW, LED_STATE_OFF);
     }
 }
+#endif

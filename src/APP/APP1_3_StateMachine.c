@@ -1,4 +1,6 @@
 
+
+#if 0
 #include "HAL/LED.h"
 
 #define RED 0
@@ -58,3 +60,4 @@ void Runnable_LED_StateMachine(void)
         break;
     }
 }
+#endif

@@ -8,8 +8,8 @@
 /************************************************Defines*************************************************/
 /********************************************************************************************************/
 #define LCD_TOTAL_PINS_NUM NUMBER_OF_DATA_LINES + 3
-#define LCD_USER_STATE_BUSY 0
-#define LCD_USER_STATE_READY 1
+#define LCD_USER_STATE_BUSY 1
+#define LCD_USER_STATE_READY 0
 #define LCD_REQ_TYPE_WRITE 0
 #define LCD_REQ_TYPE_CLEAR 1
 #define LCD_REQ_TYPE_SET_P 2
@@ -139,6 +139,7 @@ Error_Status LCD_WriteStringAsync(u8_t *string, u8_t length, CallBack_t CB)
             Write_Request.CallBack = CB;
             User_Resquest[Index].U_Type = LCD_REQ_TYPE_WRITE;
             User_Resquest[Index].U_State = LCD_USER_STATE_BUSY;
+
             break;
         }
     }
@@ -355,6 +356,7 @@ static void LCD_WriteToPins(u8_t Info, u8_t State)
     case STATIC_STATE_BUSY:
         GPIO_Set_PinValue(LCDs_PinCfg.E_pin.Port, LCDs_PinCfg.E_pin.Pin, GPIO_STATE_RESET);
         Command_State = STATIC_STATE_READY;
+
         break;
 
     default:
@@ -432,6 +434,7 @@ static void LCD_WriteToPins(u8_t Info, u8_t State)
 
 static void OperationState_WriteFunc()
 {
+
     static u8_t write_state = STATIC_STATE_READY;
 #if NUMBER_OF_DATA_LINES == DATA_4_PINS
     static u8_t CommandState = 0;
