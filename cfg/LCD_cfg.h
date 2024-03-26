@@ -7,7 +7,7 @@
  *DATA_8_PINS -> operate the LCD with 8 wires
  *DATA_4_PINS -> operate the LCD with 4 wires
  */
-#define NUMBER_OF_DATA_LINES DATA_8_PINS
+#define NUMBER_OF_DATA_LINES DATA_4_PINS
 
 /*Options are:
  *ONE_LINE  -> operate the LCD with 1 * 16 character blocks
@@ -46,7 +46,7 @@
  *BLINK_OFF -> turn on the blinking at the beginnig of the LCD operation
  *BLINK_ON  -> turn off the blinking at the beginnig of the LCD operation
  */
-#define BLINK_STATE BLINK_OFF
+#define BLINK_STATE BLINK_ON
 
 /*Options are:
  *INCREMENT -> turn on the incrementation at the beginnig of the LCD operation

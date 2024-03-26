@@ -286,6 +286,7 @@ static void Init_State_Func()
 
     if (Init_Time_Stamp < 8)
     {
+
         /*set the font and number of lines configuration to the command*/
         LOC_FunctionSetCommand = LCD_4_PIN_COMMAND_2_ND_FUNC_SET;
         LOC_FunctionSetCommand |= (FONT_SIZE << LCD_2_BIT_OFFSET);
@@ -293,6 +294,7 @@ static void Init_State_Func()
 
         /*second call of the function set command*/
         LCD_WriteToPins(LOC_FunctionSetCommand, WRITE_COMMAND_STATE);
+        Init_Time_Stamp++;
     }
     /********************************** call the display on/off command **********************************/
     if (Init_Time_Stamp < 12)
@@ -307,12 +309,14 @@ static void Init_State_Func()
 
         /*call of the display on/off command*/
         LCD_WriteToPins(LOC_DisplayOnOffCommand, WRITE_COMMAND_STATE);
+        Init_Time_Stamp++;
     }
     /********************************** call the display clear command **********************************/
     if (Init_Time_Stamp < 16)
     {
         /*call of the display clear command*/
         LCD_WriteToPins(LOC_DisplayClearCommand, WRITE_COMMAND_STATE);
+        Init_Time_Stamp++;
     }
     /********************************** call the entry mode set command **********************************/
     if (Init_Time_Stamp < 20)
@@ -323,17 +327,21 @@ static void Init_State_Func()
 
         /*call of the entry mode set command*/
         LCD_WriteToPins(LOC_EntryModeCommand, WRITE_COMMAND_STATE);
+        Init_Time_Stamp++;
     }
     else
     {
+
         LCD_State = LCD_STATE_OPER;
         Init_Time_Stamp = 0;
+        GPIO_Set_PinValue(GPIO_PORT_A, GPIO_PIN_11, GPIO_STATE_SET);
     }
 #endif
 }
 
 static void LCD_WriteToPins(u8_t Info, u8_t State)
 {
+
 #if NUMBER_OF_DATA_LINES == DATA_8_PINS
     static u8_t Command_State = STATIC_STATE_READY;
     u8_t Index;
