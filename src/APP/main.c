@@ -18,7 +18,7 @@
 #define TEST_SCHD 5
 #define TEST_LCD 6
 #define TEST_USART 7
-#define APP TEST_LCD
+#define APP TEST_USART
 
 // ----- main() ---------------------------------------------------------------
 
@@ -31,7 +31,7 @@
 
 void Runnable_LED_Toggle(void);
 void LCD_Write();
-void Led_On();
+void Led_On_off();
 
 #if APP == TEST_NVIC
 void delay_ms(u32_t ms)
@@ -188,7 +188,6 @@ int main(int argc, char *argv[])
   LED_Init();
   LCD_Init();
   SCH_CFG_SchedulerInit();
-  LCD_Write();
   SCH_CTRL_StartScheduler();
 
 #endif
@@ -197,7 +196,10 @@ int main(int argc, char *argv[])
   GPIO_Pin_t USART_Pins[2] = {[0] = {.Pin = GPIO_PIN_6, .Port = GPIO_PORT_B, .Mode = GPIO_MODE_AF_PP, .Speed = GPIO_SPEED_VHIGH},
                               [1] = {.Pin = GPIO_PIN_7, .Port = GPIO_PORT_B, .Mode = GPIO_MODE_AF_PP, .Speed = GPIO_SPEED_VHIGH}};
 
-  USART_Req_t USARAT_Byte = {.length = 1, .buffer = (u8_t)'A', .USART_Peri = USART_Peri_1, .CB = Led_On};
+u8_t kk = 0;
+
+  USART_Req_t USARAT_Byte = {.length = 1, .buffer = &kk, .USART_Peri = USART_Peri_1, .CB = Led_On_off};
+  USART_Req_t USARAT_Bytes = {.length = 6, .buffer = 'ABBBBB', .USART_Peri = USART_Peri_1, .CB = Led_On_off};
 
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOB);
@@ -209,7 +211,9 @@ int main(int argc, char *argv[])
   GPIO_CFG_AlternateFunction(USART_Pins[0].Port, USART_Pins[0].Pin, GPIO_FUNC_AF7);
   GPIO_CFG_AlternateFunction(USART_Pins[1].Port, USART_Pins[1].Pin, GPIO_FUNC_AF7);
   USART_SendByte(USARAT_Byte);
-  USART_TXBufferAsyncZC(USARAT_Byte);
+  //USART_TXBufferAsyncZC(USARAT_Byte);
+ // USART_TXBufferAsyncZC(USARAT_Bytes);
+ USART_RXBufferAsyncZC(USARAT_Byte);
   while (1)
     ;
 #endif
@@ -221,16 +225,12 @@ int main(int argc, char *argv[])
 
 // ----------------------------------------------------------------------------
 
-void Led_On()
+void Led_On_off()
 {
-  LED_SetState(LED_Toggle, LED_STATE_ON);
+  LED_ToggleLed(LED_Toggle);
 }
 
 void LCD_Write()
 {
-  LCD_WriteStringAsync((u8_t *)"hello", 5, NULL);
-  LCD_SetCursorPositionAsync(0, 6, NULL);
-  // LCD_WriteStringAsync("hello", 5, NULL);
-  // LCD_SetCursorPositionAsync(1, 6, NULL);
-  LCD_WriteStringAsync((u8_t *)"hello", 5, Led_On);
+  LCD_WriteStringAsync("hello", 5, Led_On_off);
 }
