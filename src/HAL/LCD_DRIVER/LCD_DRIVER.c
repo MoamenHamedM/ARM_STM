@@ -211,11 +211,11 @@ Error_Status LCD_ClearScreenAsync(CallBack_t CB)
     return LOC_Status;
 }
 
+#if NUMBER_OF_DATA_LINES == DATA_8_PINS
 static void Init_State_Func()
 {
     static u8_t Init_Call_Count = 0;
 
-#if NUMBER_OF_DATA_LINES == DATA_8_PINS
     u8_t LOC_FunctionSetCommand = LCD_8_PIN_COMMAND_FUNC_SET;
     u8_t LOC_DisplayOnOffCommand = LCD_8_PIN_COMMAND_ONOFF;
     u8_t LOC_DisplayClearCommand = LCD_8_PIN_COMMAND_CLEAR;
@@ -267,9 +267,13 @@ static void Init_State_Func()
         LCD_State = LCD_STATE_OPER;
         Init_Call_Count = 0;
     }
+}
 #endif
 
 #if NUMBER_OF_DATA_LINES == DATA_4_PINS
+static void Init_State_Func()
+{
+    static u8_t Init_Call_Count = 0;
 
     u8_t LOC_FunctionSetCommand = LCD_4_PIN_COMMAND_1_ST_FUNC_SET;
     u8_t LOC_DisplayOnOffCommand = LCD_4_PIN_COMMAND_ONOFF;
@@ -284,7 +288,7 @@ static void Init_State_Func()
         Init_Call_Count++;
     }
 
-    if (Init_Call_Count < 8)
+    else if (Init_Call_Count < 8)
     {
         /*set the font and number of lines configuration to the command*/
         LOC_FunctionSetCommand = LCD_4_PIN_COMMAND_2_ND_FUNC_SET;
@@ -296,7 +300,7 @@ static void Init_State_Func()
         Init_Call_Count++;
     }
     /********************************** call the display on/off command **********************************/
-    if (Init_Call_Count < 12)
+    else if (Init_Call_Count < 12)
     {
         /*set the blink, cursor and display state configuration to the command*/
         LOC_DisplayOnOffCommand |= (BLINK_STATE);
@@ -311,14 +315,14 @@ static void Init_State_Func()
         Init_Call_Count++;
     }
     /********************************** call the display clear command **********************************/
-    if (Init_Call_Count < 16)
+    else if (Init_Call_Count < 16)
     {
         /*call of the display clear command*/
         LCD_WriteToPins(LOC_DisplayClearCommand, WRITE_COMMAND_STATE);
         Init_Call_Count++;
     }
     /********************************** call the entry mode set command **********************************/
-    if (Init_Call_Count < 20)
+    else if (Init_Call_Count < 20)
     {
         /*set the font and number of lines configuration to the command*/
         LOC_EntryModeCommand |= (SHIFT_STATE);
@@ -334,13 +338,12 @@ static void Init_State_Func()
         LCD_State = LCD_STATE_OPER;
         Init_Call_Count = 0;
     }
-#endif
 }
-
-static void LCD_WriteToPins(u8_t Info, u8_t State)
-{
+#endif
 
 #if NUMBER_OF_DATA_LINES == DATA_8_PINS
+static void LCD_WriteToPins(u8_t Info, u8_t State)
+{
     static u8_t Command_State = STATIC_STATE_READY;
     u8_t Index;
 
@@ -368,9 +371,12 @@ static void LCD_WriteToPins(u8_t Info, u8_t State)
     default:
         break;
     }
+}
 #endif
 
 #if NUMBER_OF_DATA_LINES == DATA_4_PINS
+static void LCD_WriteToPins(u8_t Info, u8_t State)
+{
     static u8_t Command_State = STATIC_STATE_READY;
     static u8_t Command_Nibble = COMMAND_NIBBLE_HIGH;
     u8_t Index;
@@ -383,11 +389,11 @@ static void LCD_WriteToPins(u8_t Info, u8_t State)
         case STATIC_STATE_READY:
             GPIO_Set_PinValue(LCDs_PinCfg.R_W_pin.Port, LCDs_PinCfg.R_W_pin.Pin, GPIO_STATE_RESET);
             GPIO_Set_PinValue(LCDs_PinCfg.R_S_pin.Port, LCDs_PinCfg.R_S_pin.Pin, State);
-            for (Index = 0; Index < 4; Index++)
+            for (Index = 4; Index < 8; Index++)
             {
                 GPIO_Set_PinValue(LCDs_PinCfg.LCD_data_pins[Index].Port,
                                   LCDs_PinCfg.LCD_data_pins[Index].Pin,
-                                  ((Info >> (Index + LCD_4_BIT_OFFSET)) & 1));
+                                  ((Info >> Index) & 1));
             }
             GPIO_Set_PinValue(LCDs_PinCfg.E_pin.Port, LCDs_PinCfg.E_pin.Pin, GPIO_STATE_SET);
             Command_State = STATIC_STATE_BUSY;
@@ -434,9 +440,8 @@ static void LCD_WriteToPins(u8_t Info, u8_t State)
     default:
         break;
     }
-
-#endif
 }
+#endif
 
 static void OperationState_WriteFunc()
 {
