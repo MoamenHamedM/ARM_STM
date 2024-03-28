@@ -7,5 +7,6 @@ extern void Runnable_LED_SW_ON_OFF(void);
 extern void SW_Runnable(void);
 extern void Runnable_LED_StateMachine(void);
 extern void LCD_Runnable(void);
+extern void LCD_Write(void);
 
-#endif // RUNNABLES_PROTOTYPES_
+#endif

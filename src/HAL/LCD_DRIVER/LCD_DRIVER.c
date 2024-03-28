@@ -280,8 +280,28 @@ static void Init_State_Func()
     u8_t LOC_DisplayClearCommand = LCD_4_PIN_COMMAND_CLEAR;
     u8_t LOC_EntryModeCommand = LCD_4_PIN_COMMAND_ENTRY;
 
+//  if (Init_Call_Count < 4)
+//  {
+//      /*first call of the function set command*/
+//      LCD_WriteToPins(0x03, WRITE_COMMAND_STATE);
+//      Init_Call_Count++;
+//  }
+//
+//  else if (Init_Call_Count < 6)
+//  {
+//      /*first call of the function set command*/
+//      Init_Call_Count++;
+//  }
+//
+//  else if (Init_Call_Count < 10)
+//  {
+//      /*first call of the function set command*/
+//      LCD_WriteToPins(0x33, WRITE_COMMAND_STATE);
+//      Init_Call_Count++;
+//  }
+//
     /********************************** call the function set command **********************************/
-    if (Init_Call_Count < 4)
+     if (Init_Call_Count < 4)
     {
         /*first call of the function set command*/
         LCD_WriteToPins(LOC_FunctionSetCommand, WRITE_COMMAND_STATE);
@@ -294,7 +314,6 @@ static void Init_State_Func()
         LOC_FunctionSetCommand = LCD_4_PIN_COMMAND_2_ND_FUNC_SET;
         LOC_FunctionSetCommand |= (FONT_SIZE << LCD_2_BIT_OFFSET);
         LOC_FunctionSetCommand |= (NUMBER_OF_LINES << LCD_3_BIT_OFFSET);
-
         /*second call of the function set command*/
         LCD_WriteToPins(LOC_FunctionSetCommand, WRITE_COMMAND_STATE);
         Init_Call_Count++;
@@ -334,7 +353,6 @@ static void Init_State_Func()
     }
     else
     {
-
         LCD_State = LCD_STATE_OPER;
         Init_Call_Count = 0;
     }
@@ -389,11 +407,11 @@ static void LCD_WriteToPins(u8_t Info, u8_t State)
         case STATIC_STATE_READY:
             GPIO_Set_PinValue(LCDs_PinCfg.R_W_pin.Port, LCDs_PinCfg.R_W_pin.Pin, GPIO_STATE_RESET);
             GPIO_Set_PinValue(LCDs_PinCfg.R_S_pin.Port, LCDs_PinCfg.R_S_pin.Pin, State);
-            for (Index = 4; Index < 8; Index++)
+            for (Index = 0; Index < 4; Index++)
             {
                 GPIO_Set_PinValue(LCDs_PinCfg.LCD_data_pins[Index].Port,
                                   LCDs_PinCfg.LCD_data_pins[Index].Pin,
-                                  ((Info >> Index) & 1));
+                                  ((Info >> (Index + 4)) & 1));
             }
             GPIO_Set_PinValue(LCDs_PinCfg.E_pin.Port, LCDs_PinCfg.E_pin.Pin, GPIO_STATE_SET);
             Command_State = STATIC_STATE_BUSY;
@@ -429,7 +447,7 @@ static void LCD_WriteToPins(u8_t Info, u8_t State)
         case STATIC_STATE_BUSY:
             GPIO_Set_PinValue(LCDs_PinCfg.E_pin.Port, LCDs_PinCfg.E_pin.Pin, GPIO_STATE_RESET);
             Command_State = STATIC_STATE_READY;
-            Command_Nibble = COMMAND_NIBBLE_LOW;
+            Command_Nibble = COMMAND_NIBBLE_HIGH;
             break;
 
         default:
