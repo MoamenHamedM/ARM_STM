@@ -196,10 +196,11 @@ int main(int argc, char *argv[])
   GPIO_Pin_t USART_Pins[2] = {[0] = {.Pin = GPIO_PIN_6, .Port = GPIO_PORT_B, .Mode = GPIO_MODE_AF_PP, .Speed = GPIO_SPEED_VHIGH},
                               [1] = {.Pin = GPIO_PIN_7, .Port = GPIO_PORT_B, .Mode = GPIO_MODE_AF_PP, .Speed = GPIO_SPEED_VHIGH}};
 
-u8_t kk = 0;
+  u8_t kk = 'a';
+  u8_t aa[5] = "ABCDE";
 
   USART_Req_t USARAT_Byte = {.length = 1, .buffer = &kk, .USART_Peri = USART_Peri_1, .CB = Led_On_off};
-  USART_Req_t USARAT_Bytes = {.length = 6, .buffer = 'ABBBBB', .USART_Peri = USART_Peri_1, .CB = Led_On_off};
+  USART_Req_t USARAT_Bytes = {.length = 5, .buffer = aa, .USART_Peri = USART_Peri_1, .CB = NULL};
 
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOB);
@@ -210,10 +211,10 @@ u8_t kk = 0;
   LED_Init();
   GPIO_CFG_AlternateFunction(USART_Pins[0].Port, USART_Pins[0].Pin, GPIO_FUNC_AF7);
   GPIO_CFG_AlternateFunction(USART_Pins[1].Port, USART_Pins[1].Pin, GPIO_FUNC_AF7);
-  USART_SendByte(USARAT_Byte);
-  //USART_TXBufferAsyncZC(USARAT_Byte);
- // USART_TXBufferAsyncZC(USARAT_Bytes);
- USART_RXBufferAsyncZC(USARAT_Byte);
+ // USART_SendByte(USARAT_Byte);
+  // USART_TXBufferAsyncZC(USARAT_Byte);
+  USART_TXBufferAsyncZC(USARAT_Bytes);
+  //USART_RXBufferAsyncZC(USARAT_Byte);
   while (1)
     ;
 #endif
