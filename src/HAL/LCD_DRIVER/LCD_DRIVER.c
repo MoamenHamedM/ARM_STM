@@ -213,7 +213,7 @@ Error_Status LCD_ClearScreenAsync(CallBack_t CB)
 
 static void Init_State_Func()
 {
-    static u8_t Init_Time_Stamp = 0;
+    static u8_t Init_Call_Count = 0;
 
 #if NUMBER_OF_DATA_LINES == DATA_8_PINS
     u8_t LOC_FunctionSetCommand = LCD_8_PIN_COMMAND_FUNC_SET;
@@ -234,38 +234,38 @@ static void Init_State_Func()
     LOC_EntryModeCommand |= (SHIFT_STATE);
     LOC_EntryModeCommand |= (INCREMENT_STATE << LCD_1_BIT_OFFSET);
 
-    if (Init_Time_Stamp < 2)
+    if (Init_Call_Count < 2)
     {
         /*call the function set command*/
         LCD_WriteToPins(LOC_FunctionSetCommand, WRITE_COMMAND_STATE);
-        Init_Time_Stamp++;
+        Init_Call_Count++;
     }
 
-    else if (Init_Time_Stamp < 4)
+    else if (Init_Call_Count < 4)
     {
         /*call the display on/off command*/
         LCD_WriteToPins(LOC_DisplayOnOffCommand, WRITE_COMMAND_STATE);
-        Init_Time_Stamp++;
+        Init_Call_Count++;
     }
 
-    else if (Init_Time_Stamp < 6)
+    else if (Init_Call_Count < 6)
     {
         /*call the display clear command*/
         LCD_WriteToPins(LOC_DisplayClearCommand, WRITE_COMMAND_STATE);
-        Init_Time_Stamp++;
+        Init_Call_Count++;
     }
 
-    else if (Init_Time_Stamp < 8)
+    else if (Init_Call_Count < 8)
     {
         /*call the entry mode set command*/
         LCD_WriteToPins(LOC_EntryModeCommand, WRITE_COMMAND_STATE);
-        Init_Time_Stamp++;
+        Init_Call_Count++;
     }
 
     else
     {
         LCD_State = LCD_STATE_OPER;
-        Init_Time_Stamp = 0;
+        Init_Call_Count = 0;
     }
 #endif
 
@@ -277,16 +277,15 @@ static void Init_State_Func()
     u8_t LOC_EntryModeCommand = LCD_4_PIN_COMMAND_ENTRY;
 
     /********************************** call the function set command **********************************/
-    if (Init_Time_Stamp < 4)
+    if (Init_Call_Count < 4)
     {
         /*first call of the function set command*/
         LCD_WriteToPins(LOC_FunctionSetCommand, WRITE_COMMAND_STATE);
-        Init_Time_Stamp++;
+        Init_Call_Count++;
     }
 
-    if (Init_Time_Stamp < 8)
+    if (Init_Call_Count < 8)
     {
-
         /*set the font and number of lines configuration to the command*/
         LOC_FunctionSetCommand = LCD_4_PIN_COMMAND_2_ND_FUNC_SET;
         LOC_FunctionSetCommand |= (FONT_SIZE << LCD_2_BIT_OFFSET);
@@ -294,10 +293,10 @@ static void Init_State_Func()
 
         /*second call of the function set command*/
         LCD_WriteToPins(LOC_FunctionSetCommand, WRITE_COMMAND_STATE);
-        Init_Time_Stamp++;
+        Init_Call_Count++;
     }
     /********************************** call the display on/off command **********************************/
-    if (Init_Time_Stamp < 12)
+    if (Init_Call_Count < 12)
     {
         /*set the blink, cursor and display state configuration to the command*/
         LOC_DisplayOnOffCommand |= (BLINK_STATE);
@@ -309,17 +308,17 @@ static void Init_State_Func()
 
         /*call of the display on/off command*/
         LCD_WriteToPins(LOC_DisplayOnOffCommand, WRITE_COMMAND_STATE);
-        Init_Time_Stamp++;
+        Init_Call_Count++;
     }
     /********************************** call the display clear command **********************************/
-    if (Init_Time_Stamp < 16)
+    if (Init_Call_Count < 16)
     {
         /*call of the display clear command*/
         LCD_WriteToPins(LOC_DisplayClearCommand, WRITE_COMMAND_STATE);
-        Init_Time_Stamp++;
+        Init_Call_Count++;
     }
     /********************************** call the entry mode set command **********************************/
-    if (Init_Time_Stamp < 20)
+    if (Init_Call_Count < 20)
     {
         /*set the font and number of lines configuration to the command*/
         LOC_EntryModeCommand |= (SHIFT_STATE);
@@ -327,14 +326,13 @@ static void Init_State_Func()
 
         /*call of the entry mode set command*/
         LCD_WriteToPins(LOC_EntryModeCommand, WRITE_COMMAND_STATE);
-        Init_Time_Stamp++;
+        Init_Call_Count++;
     }
     else
     {
 
         LCD_State = LCD_STATE_OPER;
-        Init_Time_Stamp = 0;
-        GPIO_Set_PinValue(GPIO_PORT_A, GPIO_PIN_11, GPIO_STATE_SET);
+        Init_Call_Count = 0;
     }
 #endif
 }
@@ -755,12 +753,12 @@ Error_Status LCD_GetStatus(u8_t *Status)
 
 void LCD_Runnable(void)
 {
-    if (LCD_State == LCD_STATE_INIT)
+    switch (LCD_State)
     {
+    case LCD_STATE_INIT:
         Init_State_Func();
-    }
-    else if (LCD_State == LCD_STATE_OPER)
-    {
+        break;
+    case LCD_STATE_OPER:
         if (User_Resquest[User_CurrentRequest].U_State == LCD_USER_STATE_BUSY)
         {
             switch (User_Resquest[User_CurrentRequest].U_Type)
@@ -779,5 +777,8 @@ void LCD_Runnable(void)
                 break;
             }
         }
+        break;
+    default:
+        break;
     }
 }

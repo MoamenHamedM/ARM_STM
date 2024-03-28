@@ -10,9 +10,10 @@
 /********************************************************************************************************/
 /************************************************Defines*************************************************/
 /********************************************************************************************************/
-#define USART_Peri_1 (void *)0x40011000
-#define USART_Peri_2 (void *)0x40004401
-#define USART_Peri_6 (void *)0x40011402
+
+#define USART_Peri_1 0
+#define USART_Peri_2 1
+#define USART_Peri_6 2
 
 #define USART_WORD_LENGTH_8 0x00000000
 #define USART_WORD_LENGTH_9 0x00010000
@@ -29,19 +30,26 @@
 /********************************************************************************************************/
 /************************************************Types***************************************************/
 /********************************************************************************************************/
-typedef void (*TXCB)(void);
-typedef void (*RXCB)(void);
+typedef void (*CallBack_t)(void);
 
 typedef struct
 {
-    void *address;
-    f32_t BaudRate;
+    u32_t address;
+    u32_t BaudRate;
     u32_t WordLength;
     u32_t ParityControl;
     u32_t ParitySelect;
     u32_t StopBits;
     u32_t OverSampling;
 } USART_cfg_t;
+
+typedef struct
+{
+    u8_t USART_Peri;
+    u8_t *buffer;
+    u16_t length;
+    CallBack_t CB;
+} USART_Req_t;
 
 /********************************************************************************************************/
 /************************************************APIs****************************************************/
@@ -63,7 +71,7 @@ Error_Status USART_Init();
  * return:
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_USART_TimeOut
  */
-Error_Status USART_SendByte(void *USART_Peri, u8_t byte);
+Error_Status USART_SendByte(USART_Req_t USART_Req);
 
 /*
  * use this function to recieve a byte synchronously through USART
@@ -74,7 +82,7 @@ Error_Status USART_SendByte(void *USART_Peri, u8_t byte);
  * return:
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_USART_TimeOut
  */
-Error_Status USART_GetByte(void *USART_Peri, u8_t *byte);
+Error_Status USART_GetByte(USART_Req_t USART_Req);
 
 /*
  * use this function to send a buffer of bytes asynchronously through USART
@@ -87,7 +95,7 @@ Error_Status USART_GetByte(void *USART_Peri, u8_t *byte);
  * return:
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_USART_Busy_Buffer
  */
-Error_Status USART_TXBufferAsyncZC(void *USART_Peri, u8_t *buffer, u16_t length, TXCB CB);
+Error_Status USART_TXBufferAsyncZC(USART_Req_t USART_Req);
 
 /*
  * use this function to recieve a buffer of bytes asynchronously through USART
@@ -100,6 +108,6 @@ Error_Status USART_TXBufferAsyncZC(void *USART_Peri, u8_t *buffer, u16_t length,
  * return:
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_USART_Busy_Buffer
  */
-Error_Status USART_RXBufferAsyncZC(void *USART_Peri, u8_t *buffer, u16_t length, RXCB CB);
+Error_Status USART_RXBufferAsyncZC(USART_Req_t USART_Req);
 
 #endif // USART_DRIVER_

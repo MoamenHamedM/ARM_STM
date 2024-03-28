@@ -8,6 +8,7 @@
 #include "MCAL/SYSTICK_DRIVER.h"
 #include "HAL/SCHEDULER.h"
 #include "HAL/LCD_DRIVER.h"
+#include "MCAL/USART_DRIVER.h"
 
 #define TEST_RCC 0
 #define TEST_GPIO 1
@@ -16,6 +17,7 @@
 #define TEST_SYSTICK 4
 #define TEST_SCHD 5
 #define TEST_LCD 6
+#define TEST_USART 7
 #define APP TEST_LCD
 
 // ----- main() ---------------------------------------------------------------
@@ -29,6 +31,7 @@
 
 void Runnable_LED_Toggle(void);
 void LCD_Write();
+void Led_On();
 
 #if APP == TEST_NVIC
 void delay_ms(u32_t ms)
@@ -183,11 +186,32 @@ int main(int argc, char *argv[])
 #if APP == TEST_LCD
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
   LED_Init();
-  LCD_InitAsync();
+  LCD_Init();
   SCH_CFG_SchedulerInit();
   LCD_Write();
   SCH_CTRL_StartScheduler();
 
+#endif
+
+#if APP == TEST_USART
+  GPIO_Pin_t USART_Pins[2] = {[0] = {.Pin = GPIO_PIN_6, .Port = GPIO_PORT_B, .Mode = GPIO_MODE_AF_PP, .Speed = GPIO_SPEED_VHIGH},
+                              [1] = {.Pin = GPIO_PIN_7, .Port = GPIO_PORT_B, .Mode = GPIO_MODE_AF_PP, .Speed = GPIO_SPEED_VHIGH}};
+
+  USART_Req_t USARAT_Byte = {.length = 1, .buffer = (u8_t)'A', .USART_Peri = USART_Peri_1, .CB = Led_On};
+
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOB);
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_USART1);
+  NVIC_CTRL_EnableIRQ(NVIC_IRQ_USART1);
+  USART_Init();
+  GPIO_Init(USART_Pins, 2);
+  LED_Init();
+  GPIO_CFG_AlternateFunction(USART_Pins[0].Port, USART_Pins[0].Pin, GPIO_FUNC_AF7);
+  GPIO_CFG_AlternateFunction(USART_Pins[1].Port, USART_Pins[1].Pin, GPIO_FUNC_AF7);
+  USART_SendByte(USARAT_Byte);
+  USART_TXBufferAsyncZC(USARAT_Byte);
+  while (1)
+    ;
 #endif
 
   return 0;
@@ -204,10 +228,9 @@ void Led_On()
 
 void LCD_Write()
 {
-  LCD_WriteStringAsync("hello", 5, NULL);
+  LCD_WriteStringAsync((u8_t *)"hello", 5, NULL);
   LCD_SetCursorPositionAsync(0, 6, NULL);
- // LCD_WriteStringAsync("hello", 5, NULL);
- // LCD_SetCursorPositionAsync(1, 6, NULL);
-
-  LCD_WriteStringAsync("hello", 5, Led_On);
+  // LCD_WriteStringAsync("hello", 5, NULL);
+  // LCD_SetCursorPositionAsync(1, 6, NULL);
+  LCD_WriteStringAsync((u8_t *)"hello", 5, Led_On);
 }
