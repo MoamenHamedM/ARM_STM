@@ -217,7 +217,7 @@ Error_Status USART_TXBufferAsyncZC(USART_Req_t USART_Req)
 
     Error_Status LOC_Status = Status_NOK;
 
-    if (USART_Req.buffer == NULL || USART_Req.CB == NULL)
+    if (USART_Req.buffer == NULL)
     {
         LOC_Status = Status_Null_Pointer;
     }
@@ -250,7 +250,7 @@ Error_Status USART_RXBufferAsyncZC(USART_Req_t USART_Req)
 {
     Error_Status LOC_Status = Status_NOK;
 
-    if (USART_Req.buffer == NULL || USART_Req.CB == NULL)
+    if (USART_Req.buffer == NULL)
     {
         LOC_Status = Status_Null_Pointer;
     }
