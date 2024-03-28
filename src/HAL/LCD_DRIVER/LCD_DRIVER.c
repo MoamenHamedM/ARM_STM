@@ -91,7 +91,7 @@ static void OperationState_SetPFunc();
 /*********************************************APIs Implementation****************************************/
 /********************************************************************************************************/
 
-Error_Status LCD_InitAsync()
+Error_Status LCD_Init()
 {
     Error_Status LOC_Status = Status_NOK;
     GPIO_Pin_t LcdPins[LCD_TOTAL_PINS_NUM];

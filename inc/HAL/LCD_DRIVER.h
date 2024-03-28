@@ -74,11 +74,11 @@ typedef struct
 /********************************************************************************************************/
 
 /*
- * use this function to initialize the lcd
+ * use this function to initialize the lcd pins
  * return:
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
  */
-Error_Status LCD_InitAsync();
+Error_Status LCD_Init();
 
 /*
  * use this function to write a string on the lcd
