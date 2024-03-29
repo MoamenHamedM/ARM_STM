@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
   LED_Init();
   GPIO_CFG_AlternateFunction(USART_Pins[0].Port, USART_Pins[0].Pin, GPIO_FUNC_AF7);
   GPIO_CFG_AlternateFunction(USART_Pins[1].Port, USART_Pins[1].Pin, GPIO_FUNC_AF7);
- // USART_SendByte(USARAT_Byte);
+  USART_SendByte(USARAT_Byte);
   // USART_TXBufferAsyncZC(USARAT_Byte);
   USART_TXBufferAsyncZC(USARAT_Bytes);
   //USART_RXBufferAsyncZC(USARAT_Byte);

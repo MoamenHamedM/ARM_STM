@@ -134,7 +134,7 @@ USART_Init()
 Error_Status USART_SendByte(USART_Req_t USART_Req)
 {
     Error_Status LOC_Status = Status_NOK;
-    u16_t TimeOut = 60000;
+    volatile u16_t TimeOut = 3000;
 
     if (USART_Req.USART_Peri > USART_Peri_6)
     {
@@ -155,15 +155,16 @@ Error_Status USART_SendByte(USART_Req_t USART_Req)
         ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->DR = *(USART_Req.buffer);
         ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_TX_ENABLE_FLAG;
 
-        while (!(((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->SR & USART_SYNC_TXE_FLAG) && TimeOut)
+        // while (!(((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->SR & USART_SYNC_TXE_FLAG) && TimeOut)
+        while (TimeOut)
         {
             TimeOut--;
         }
 
-        if (!TimeOut)
+      /* if (!TimeOut)
         {
             LOC_Status = Status_USART_TimeOut;
-        }
+        }*/
 
         ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 &= ~USART_TX_ENABLE_FLAG;
         TX_Request[USART_Req.USART_Peri].state = USART_REQ_STATE_READY;
