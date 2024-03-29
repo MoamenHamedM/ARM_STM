@@ -197,10 +197,10 @@ int main(int argc, char *argv[])
                               [1] = {.Pin = GPIO_PIN_7, .Port = GPIO_PORT_B, .Mode = GPIO_MODE_AF_PP, .Speed = GPIO_SPEED_VHIGH}};
 
   u8_t kk = 'a';
-  u8_t aa[5] = "ABCDE";
+  u8_t aa[10] = "ABCDE12345";
 
   USART_Req_t USARAT_Byte = {.length = 1, .buffer = &kk, .USART_Peri = USART_Peri_1, .CB = Led_On_off};
-  USART_Req_t USARAT_Bytes = {.length = 5, .buffer = aa, .USART_Peri = USART_Peri_1, .CB = NULL};
+  USART_Req_t USARAT_Bytes = {.length = 10, .buffer = aa, .USART_Peri = USART_Peri_1, .CB = NULL};
 
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOB);

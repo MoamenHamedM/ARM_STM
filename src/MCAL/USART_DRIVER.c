@@ -280,7 +280,7 @@ void USART1_IRQHandler(void)
 {
     if (((USART_Peri_t *)USART_ADD[USART_Peri_1])->SR & USART_TX_DONE_IRQ)
     {
-        if (TX_Request[USART_Peri_1].buffer.pos < TX_Request[USART_Peri_1].buffer.size)
+        if (TX_Request[USART_Peri_1].buffer.pos <= TX_Request[USART_Peri_1].buffer.size)
         {
             ((USART_Peri_t *)USART_ADD[USART_Peri_1])->DR = TX_Request[USART_Peri_1].buffer.data[TX_Request[USART_Peri_1].buffer.pos];
             TX_Request[USART_Peri_1].buffer.pos++;
@@ -321,7 +321,7 @@ void USART2_IRQHandler(void)
 {
     if (((USART_Peri_t *)USART_ADD[USART_Peri_2])->SR & USART_TX_DONE_IRQ)
     {
-        if (TX_Request[USART_Peri_2].buffer.pos < TX_Request[USART_Peri_2].buffer.size)
+        if (TX_Request[USART_Peri_2].buffer.pos <= TX_Request[USART_Peri_2].buffer.size)
         {
             ((USART_Peri_t *)USART_ADD[USART_Peri_2])->DR = TX_Request[USART_Peri_2].buffer.data[TX_Request[USART_Peri_2].buffer.pos];
             TX_Request[USART_Peri_2].buffer.pos++;
@@ -362,7 +362,7 @@ void USART6_IRQHandler(void)
 {
     if (((USART_Peri_t *)USART_ADD[USART_Peri_6])->SR & USART_TX_DONE_IRQ)
     {
-        if (TX_Request[USART_Peri_6].buffer.pos < TX_Request[USART_Peri_6].buffer.size)
+        if (TX_Request[USART_Peri_6].buffer.pos <= TX_Request[USART_Peri_6].buffer.size)
         {
             ((USART_Peri_t *)USART_ADD[USART_Peri_6])->DR = TX_Request[USART_Peri_6].buffer.data[TX_Request[USART_Peri_6].buffer.pos];
             TX_Request[USART_Peri_6].buffer.pos++;
