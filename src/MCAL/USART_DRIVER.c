@@ -161,10 +161,10 @@ Error_Status USART_SendByte(USART_Req_t USART_Req)
             TimeOut--;
         }
 
-      /* if (!TimeOut)
-        {
-            LOC_Status = Status_USART_TimeOut;
-        }*/
+        /* if (!TimeOut)
+          {
+              LOC_Status = Status_USART_TimeOut;
+          }*/
 
         ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 &= ~USART_TX_ENABLE_FLAG;
         TX_Request[USART_Req.USART_Peri].state = USART_REQ_STATE_READY;
@@ -239,9 +239,9 @@ Error_Status USART_TXBufferAsyncZC(USART_Req_t USART_Req)
         TX_Request[USART_Req.USART_Peri].state = USART_REQ_STATE_BUSY;
 
         ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_TX_ENABLE_FLAG;
-        ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_TXEIE_ENABLE_FLAG;
         ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->DR = TX_Request[USART_Req.USART_Peri].buffer.data[0];
         TX_Request[USART_Req.USART_Peri].buffer.pos++;
+        ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_TXEIE_ENABLE_FLAG;
     }
 
     return LOC_Status;
@@ -281,7 +281,7 @@ void USART1_IRQHandler(void)
 {
     if (((USART_Peri_t *)USART_ADD[USART_Peri_1])->SR & USART_TX_DONE_IRQ)
     {
-        if (TX_Request[USART_Peri_1].buffer.pos <= TX_Request[USART_Peri_1].buffer.size)
+        if (TX_Request[USART_Peri_1].buffer.pos < TX_Request[USART_Peri_1].buffer.size)
         {
             ((USART_Peri_t *)USART_ADD[USART_Peri_1])->DR = TX_Request[USART_Peri_1].buffer.data[TX_Request[USART_Peri_1].buffer.pos];
             TX_Request[USART_Peri_1].buffer.pos++;
@@ -322,7 +322,7 @@ void USART2_IRQHandler(void)
 {
     if (((USART_Peri_t *)USART_ADD[USART_Peri_2])->SR & USART_TX_DONE_IRQ)
     {
-        if (TX_Request[USART_Peri_2].buffer.pos <= TX_Request[USART_Peri_2].buffer.size)
+        if (TX_Request[USART_Peri_2].buffer.pos < TX_Request[USART_Peri_2].buffer.size)
         {
             ((USART_Peri_t *)USART_ADD[USART_Peri_2])->DR = TX_Request[USART_Peri_2].buffer.data[TX_Request[USART_Peri_2].buffer.pos];
             TX_Request[USART_Peri_2].buffer.pos++;
@@ -363,7 +363,7 @@ void USART6_IRQHandler(void)
 {
     if (((USART_Peri_t *)USART_ADD[USART_Peri_6])->SR & USART_TX_DONE_IRQ)
     {
-        if (TX_Request[USART_Peri_6].buffer.pos <= TX_Request[USART_Peri_6].buffer.size)
+        if (TX_Request[USART_Peri_6].buffer.pos < TX_Request[USART_Peri_6].buffer.size)
         {
             ((USART_Peri_t *)USART_ADD[USART_Peri_6])->DR = TX_Request[USART_Peri_6].buffer.data[TX_Request[USART_Peri_6].buffer.pos];
             TX_Request[USART_Peri_6].buffer.pos++;
