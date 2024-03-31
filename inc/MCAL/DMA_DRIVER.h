@@ -9,6 +9,21 @@
 /************************************************Defines*************************************************/
 /********************************************************************************************************/
 
+#define DMA_1 (void *)0x40026000
+#define DMA_2 (void *)0x40026400
+
+#define DMA_STRM_0 0
+#define DMA_STRM_1 1
+#define DMA_STRM_2 2
+#define DMA_STRM_3 3
+#define DMA_STRM_4 4
+#define DMA_STRM_5 5
+#define DMA_STRM_6 6
+#define DMA_STRM_7 7
+
+#define DMA_STREMSTATE_DISABLE 0x4000000000
+#define DMA_STREMSTATE_ENABLE 0x4000000001
+
 #define DMA_STRM_0_TRANS_COMP_FLAG 0x100000020
 #define DMA_STRM_1_TRANS_COMP_FLAG 0x100000800
 #define DMA_STRM_2_TRANS_COMP_FLAG 0x100200000
@@ -59,6 +74,9 @@
 #define DMA_TEIE_FLAG 0x2000000001
 #define DMA_DMEIE_FLAG 0x2000000001
 #define DMA_FIFO_EI_FLAG 0x3000000008
+
+#define DMA_INT_STATE_ENABLE 1
+#define DMA_INT_STATE_DISABLE 0
 
 #define DMA_CHN_0 0x300000000
 #define DMA_CHN_1 0x302000000
@@ -117,9 +135,6 @@
 #define DMA_PERI_FLOW_DMA 0x1000000000
 #define DMA_PERI_FLOW_PERI 0x1000000020
 
-#define DMA_STREMSTATE_DISABLE 0x4000000000
-#define DMA_STREMSTATE_ENABLE 0x4000000001
-
 #define DMA_DIR_MODE_ENABLE 0x5000000000
 #define DMA_DIR_MODE_DISABLE 0x5000000004
 
@@ -127,26 +142,6 @@
 #define DMA_FIFO_THRES_1_2 0x6000000001
 #define DMA_FIFO_THRES_3_4 0x6000000002
 #define DMA_FIFO_THRES_FULL 0x6000000003
-
-#define DMA_CHN_SEL_CLEARFLAG 0x0E000000
-#define DMA_MEM_B_CLEARFLAG 0x03000000
-#define DMA_PERI_B_CLEARFLAG 0x00600000
-#define DMA_CT_CLEAR_FLAG 0x00080000
-#define DMA_DB_CLEAR_FLAG 0x00040000
-#define DMA_PRIORITY_CLEAR_FLAG 0x00030000
-#define DMA_PINCOS_CLEAR_FLAG 0x00008000
-#define DMA_MEM_SIZE_CLEAR_FLAG 0x00006000
-#define DMA_PERI_SIZE_CLEAR_FLAG 0x00001800
-#define DMA_MEM_INCR_CLEAR_FLAG 0x00000400
-#define DMA_PERI_INCR_CLEAR_FLAG 0x00000200
-#define DMA_CIRC_CLEAR_FLAG 0x00000100
-#define DMA_TRANS_DIR_CLEAR_FLAG 0x000000C0
-#define DMA_PERI_FLOW_CLEAR_FLAG 0x00000020
-#define DMA_STREMSTATE_CLEAR_FLAG 0x00000001
-#define DMA_DIR_MODE_CLEAR_FLAG 0x5000000002
-#define DMA_FIFO_THRES_CLEAR_FLAG 0x6000000003
-
-#define FIFO_STATUS_GET_FLAG 0x00000038
 
 /********************************************************************************************************/
 /************************************************Types***************************************************/
@@ -156,54 +151,56 @@
 /************************************************APIs****************************************************/
 /********************************************************************************************************/
 
-Error_Status DMA_CTRL_StreamEnable_Disable(u64_t DMA_StreamState);
+Error_Status DMA_CTRL_StreamEnable_Disable(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_StreamState);
 
-Error_Status DMA_GET_InterruptStatus(u64_t DMA_Strm, u32_t *Status);
+Error_Status DMA_GET_InterruptStatus(void *DMA_Peri, u64_t DMA_Strm, u32_t *Status);
 
-Error_Status DMA_CTRL_ClearInterruptFlag(u64_t DMA_Strm);
+Error_Status DMA_CTRL_ClearInterruptFlag(void *DMA_Peri, u64_t DMA_Strm);
 
-Error_Status DMA_CTRL_InterruptEnable_Disable(u64_t DMA_Peri_F, u8_t State);
+Error_Status DMA_CTRL_InterruptEnable_Disable(void *DMA_Peri, u64_t DMA_Peri_F, u8_t STRM_Num, u8_t State);
 
-Error_Status DMA_SEL_Channel(u64_t DMA_Chn);
+Error_Status DMA_SEL_Channel(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_Chn);
 
-Error_Status DMA_CTRL_MemoryBurst(u64_t DMA_Mem_B);
+Error_Status DMA_CTRL_MemoryBurst(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_Mem_B);
 
-Error_Status DMA_CFG_PeripheralBurst(u64_t DMA_Peri_B);
+Error_Status DMA_CFG_PeripheralBurst(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_Peri_B);
 
-Error_Status DMA_SEL_CurrentTarget(u64_t DMA_CT);
+Error_Status DMA_SEL_CurrentTarget(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_CT);
 
-Error_Status DMA_GET_CurrentTarget(u32_t *DMA_CT);
+Error_Status DMA_GET_CurrentTarget(void *DMA_Peri, u8_t STRM_Num, u32_t *DMA_CT);
 
-Error_Status DMA_CFG_DoubleBuffer(u64_t DMA_DB);
+Error_Status DMA_CFG_DoubleBuffer(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_DB);
 
-Error_Status DMA_CFG_PriorityLevel(u64_t DMA_Pri);
+Error_Status DMA_CFG_PriorityLevel(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_Pri);
 
-Error_Status DMA_CFG_PeriIncr_OffsetSize(u64_t DMA_Pincos);
+Error_Status DMA_CFG_PeriIncr_OffsetSize(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_Pincos);
 
-Error_Status DMA_CFG_MemoryDataSize(u64_t DMA_Mem_S);
+Error_Status DMA_CFG_MemoryDataSize(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_Mem_S);
 
-Error_Status DMA_CFG_PeripheralDataSize(u64_t DMA_Peri_S);
+Error_Status DMA_CFG_PeripheralDataSize(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_Peri_S);
 
-Error_Status DMA_CFG_MemoryIncrement(u64_t DMA_Mem_Incr);
+Error_Status DMA_CFG_MemoryIncrement(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_Mem_Incr);
 
-Error_Status DMA_CFG_PeripheralIncrement(u64_t DMA_Peri_Incr);
+Error_Status DMA_CFG_PeripheralIncrement(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_Peri_Incr);
 
-Error_Status DMA_CFG_CircularMode(u64_t DMA_Circ);
+Error_Status DMA_CFG_CircularMode(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_Circ);
 
-Error_Status DMA_CFG_PeripherlaFlowCTRL(u64_t DMA_Peri_F);
+Error_Status DMA_CFG_PeripherlaFlowCTRL(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_Peri_F);
 
-Error_Status DMA_SET_NumOfData(u16_t Num);
+Error_Status DMA_SET_DataTransDirection(void *DMA_Peri, u8_t STRM_Num, u32_t Data_Dir);
 
-Error_Status DMA_SET_PeripheralAddress(u32_t Peri_Address);
+Error_Status DMA_SET_NumOfData(void *DMA_Peri, u8_t STRM_Num, u16_t Num);
 
-Error_Status DMA_SET_Memory0_Address(u32_t Mem_Address);
+Error_Status DMA_SET_PeripheralAddress(void *DMA_Peri, u8_t STRM_Num, u32_t Peri_Address);
 
-Error_Status DMA_SET_Memory1_Address(u32_t Mem_Address);
+Error_Status DMA_SET_Memory0_Address(void *DMA_Peri, u8_t STRM_Num, u32_t Mem_Address);
 
-Error_Status DMA_GET_FIFO_Status(u8_t *Status);
+Error_Status DMA_SET_Memory1_Address(void *DMA_Peri, u8_t STRM_Num, u32_t Mem_Address);
 
-Error_Status DMA_CTRL_DirectMode(u64_t DMA_Dir_M);
+Error_Status DMA_GET_FIFO_Status(void *DMA_Peri, u8_t STRM_Num, u8_t *Status);
 
-Error_Status DMA_CFG_FIFOThreshold(u64_t DMA_Fifo_Thres);
+Error_Status DMA_CTRL_DirectMode(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_Dir_M);
+
+Error_Status DMA_CFG_FIFOThreshold(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_Fifo_Thres);
 
 #endif
