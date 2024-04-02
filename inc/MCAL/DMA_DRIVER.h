@@ -396,7 +396,7 @@ Error_Status DMA_CFG_PeripheralFlowCTRL(void *DMA_Peri, u8_t STRM_Num, u64_t DMA
  * Return:
  *   Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
  */
-Error_Status DMA_SET_DataTransDirection(void *DMA_Peri, u8_t STRM_Num, u32_t Data_Dir);
+Error_Status DMA_SET_DataTransDirection(void *DMA_Peri, u8_t STRM_Num, u64_t Data_Dir);
 
 /*
  * Set the number of data items to be transferred for a DMA stream.

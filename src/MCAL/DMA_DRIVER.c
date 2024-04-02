@@ -530,7 +530,7 @@ Error_Status DMA_CFG_CircularMode(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_Circ)
     return LOC_Status;
 }
 
-Error_Status DMA_SET_DataTransDirection(void *DMA_Peri, u8_t STRM_Num, u32_t Data_Dir)
+Error_Status DMA_SET_DataTransDirection(void *DMA_Peri, u8_t STRM_Num, u64_t Data_Dir)
 {
     Error_Status LOC_Status = Status_NOK;
     u8_t Input_Assert = Data_Dir >> DMA_INPUT_ASSERT_OFFSET;

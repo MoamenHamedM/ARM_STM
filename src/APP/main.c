@@ -9,6 +9,7 @@
 #include "HAL/SCHEDULER.h"
 #include "HAL/LCD_DRIVER.h"
 #include "MCAL/USART_DRIVER.h"
+#include "MCAL/DMA_DRIVER.h"
 
 #define TEST_RCC 0
 #define TEST_GPIO 1
@@ -18,7 +19,8 @@
 #define TEST_SCHD 5
 #define TEST_LCD 6
 #define TEST_USART 7
-#define APP TEST_USART
+#define TEST_DMA 8
+#define APP TEST_DMA
 
 // ----- main() ---------------------------------------------------------------
 
@@ -214,9 +216,24 @@ int main(int argc, char *argv[])
   USART_SendByte(USARAT_Byte);
   // USART_TXBufferAsyncZC(USARAT_Byte);
   USART_TXBufferAsyncZC(USARAT_Bytes);
-  //USART_RXBufferAsyncZC(USARAT_Byte);
+  // USART_RXBufferAsyncZC(USARAT_Byte);
   while (1)
     ;
+#endif
+
+#if APP == TEST_DMA
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_DMA1);
+  DMA_SEL_Channel(DMA_1, DMA_STRM_0, DMA_CHN_3);
+  DMA_SEL_Channel(DMA_1, DMA_STRM_0, 54654);
+  DMA_SEL_CurrentTarget(DMA_1, DMA_STRM_0, DMA_CT_MEM1);
+  DMA_SEL_CurrentTarget(DMA_1, DMA_STRM_0, 84984);
+  DMA_CFG_PeriIncr_OffsetSize(DMA_1, DMA_STRM_0, DMA_PINCOS_FIXED);
+  DMA_CFG_PeriIncr_OffsetSize(DMA_1, DMA_STRM_0, 48998);
+  DMA_SET_DataTransDirection(DMA_1, DMA_STRM_0, DMA_TRANS_DIR_M_TO_M);
+  DMA_SET_DataTransDirection(DMA_1, DMA_STRM_0, 84864);
+  DMA_CTRL_StreamEnable_Disable(DMA_1, DMA_STRM_0, DMA_STREMSTATE_ENABLE);
+  DMA_CTRL_StreamEnable_Disable(DMA_1, DMA_STRM_0, 2326);
+
 #endif
 
   return 0;
