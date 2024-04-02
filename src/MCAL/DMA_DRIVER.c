@@ -571,7 +571,7 @@ Error_Status DMA_CFG_PeripherlaFlowCTRL(void *DMA_Peri, u8_t STRM_Num, u64_t DMA
     else
     {
         LOC_Status = Status_OK;
-        LOC_TempReg &= ~DMA_TRANS_DIR_CLEAR_FLAG;
+        LOC_TempReg &= ~DMA_PERI_FLOW_CLEAR_FLAG;
         LOC_TempReg |= (u32_t)DMA_Peri_F;
         ((DMA_Peri_t *)DMA_Peri)->DMA_STRM_REG[STRM_Num].CR = LOC_TempReg;
     }
