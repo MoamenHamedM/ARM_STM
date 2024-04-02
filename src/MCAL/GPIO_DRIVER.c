@@ -18,6 +18,7 @@
 #define GPIO_1BIT_OFFSET 0x00000001
 #define GPIO_2BIT_OFFSET 0x00000002
 #define GPIO_4BIT_OFFSET 0x00000004
+#define GPIO_8BIT_OFFSET 0x00000008
 
 typedef struct
 {
@@ -161,8 +162,8 @@ Error_Status GPIO_CFG_AlternateFunction(void *GPIO_Port, u32_t GPIO_Pin, u32_t G
     if (GPIO_Pin > GPIO_PIN_7)
     {
       LOC_AFR_Value = (((GPIO_Port_t *)GPIO_Port)->AFRH);
-      LOC_AFR_Value &= ~(GPIO_AFR_CLEAR_MASK << (GPIO_Pin * GPIO_4BIT_OFFSET));
-      LOC_AFR_Value |= (GPIO_Func << (GPIO_Pin * GPIO_4BIT_OFFSET));
+      LOC_AFR_Value &= ~(GPIO_AFR_CLEAR_MASK << ((GPIO_Pin - GPIO_8BIT_OFFSET) * GPIO_4BIT_OFFSET));
+      LOC_AFR_Value |= (GPIO_Func << ((GPIO_Pin - GPIO_8BIT_OFFSET) * GPIO_4BIT_OFFSET));
       (((GPIO_Port_t *)GPIO_Port)->AFRH) = LOC_AFR_Value;
     }
     else
