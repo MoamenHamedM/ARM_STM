@@ -169,7 +169,7 @@ Error_Status DMA_CTRL_StreamEnable_Disable(void *DMA_Peri, u8_t STRM_Num, u64_t 
  *
  * Parameters:
  *   DMA_Peri -> Pointer to the DMA peripheral base address (DMA_1 or DMA_2).
- *   DMA_Strm -> DMA stream number (DMA_STRM_0 to DMA_STRM_7).
+ *   DMA_Strm -> DMA stream number with interrupt flag (DMA_STRM_0_TRANS_COMP_FLAG to DMA_STRM_7_FIFO_ERR_FLAG).
  *   Status -> Pointer to store the interrupt status.
  *
  * Return:
@@ -182,7 +182,7 @@ Error_Status DMA_GET_InterruptStatus(void *DMA_Peri, u64_t DMA_Strm, u32_t *Stat
  *
  * Parameters:
  *   DMA_Peri -> Pointer to the DMA peripheral base address (DMA_1 or DMA_2).
- *   DMA_Strm -> DMA stream number (DMA_STRM_0 to DMA_STRM_7).
+ *   DMA_Strm -> DMA stream number with interrupt flag (DMA_STRM_0_TRANS_COMP_FLAG to DMA_STRM_7_FIFO_ERR_FLAG).
  *
  * Return:
  *   Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
