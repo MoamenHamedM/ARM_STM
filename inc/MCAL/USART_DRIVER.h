@@ -57,17 +57,17 @@ typedef struct
 
 /*
  * use this function to initialize the USART peripherals
+ * parameters:
+ * USART_CfgArr -> the configurtion array of the desired USART
  * return:
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
  */
-Error_Status USART_Init();
+Error_Status USART_Init(USART_cfg_t USART_CfgArr);
 
 /*
  * use this function to send a byte synchronously through USART
  * parameters:
- * USART_Peri -> the address of the USART peripheral to be used
- *             - USART_Peri_1, USART_Peri_2, USART_Peri_6
- * byte -> the byte to be sent
+ * USART_Req -> the desired buffer to be sent
  * return:
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_USART_TimeOut
  */
@@ -76,9 +76,7 @@ Error_Status USART_SendByte(USART_Req_t USART_Req);
 /*
  * use this function to recieve a byte synchronously through USART
  * parameters:
- * USART_Peri -> the address of the USART peripheral to be used
- *             - USART_Peri_1, USART_Peri_2, USART_Peri_6
- * byte -> the address of the byte to be recieved
+ * USART_Req -> the desired buffer to be recieved
  * return:
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_USART_TimeOut
  */
@@ -87,11 +85,7 @@ Error_Status USART_GetByte(USART_Req_t USART_Req);
 /*
  * use this function to send a buffer of bytes asynchronously through USART
  * parameters:
- * USART_Peri -> the address of the USART peripheral to be used
- *             - USART_Peri_1, USART_Peri_2, USART_Peri_6
- * buffer -> the address of the to be sent
- * length -> the length of the buffer
- * CB -> address of the function to be called after finishing - use NULL if no function is needed -
+ * USART_Req -> the desired buffer to be sent
  * return:
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_USART_Busy_Buffer
  */
@@ -100,14 +94,20 @@ Error_Status USART_TXBufferAsyncZC(USART_Req_t USART_Req);
 /*
  * use this function to recieve a buffer of bytes asynchronously through USART
  * parameters:
- * USART_Peri -> the address of the USART peripheral to be used
- *             - USART_Peri_1, USART_Peri_2, USART_Peri_6
- * buffer -> the address of the to be recieved
- * length -> the length of the buffer
- * CB -> address of the function to be called after finishing - use NULL if no function is needed -
+ * USART_Req -> the desired buffer to be recieved
  * return:
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_USART_Busy_Buffer
  */
 Error_Status USART_RXBufferAsyncZC(USART_Req_t USART_Req);
+
+/*
+ * use this function to generate a break condition on the USART
+ * parameters:
+ * USART_Peri -> the address of the USART peripheral to be used
+ *             - USART_Peri_1, USART_Peri_2, USART_Peri_6
+ * return:
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_USART_Busy_Buffer
+ */
+Error_Status USART_GenerateBreak(USART_Req_t USART_Req);
 
 #endif // USART_DRIVER_

@@ -197,6 +197,15 @@ int main(int argc, char *argv[])
 #if APP == TEST_USART
   GPIO_Pin_t USART_Pins[2] = {[0] = {.Pin = GPIO_PIN_6, .Port = GPIO_PORT_B, .Mode = GPIO_MODE_AF_PP, .Speed = GPIO_SPEED_VHIGH},
                               [1] = {.Pin = GPIO_PIN_7, .Port = GPIO_PORT_B, .Mode = GPIO_MODE_AF_PP, .Speed = GPIO_SPEED_VHIGH}};
+  USART_cfg_t USART_CFG =
+      {
+          .address = USART_Peri_1,
+          .BaudRate = 9600,
+          .WordLength = USART_WORD_LENGTH_8,
+          .ParityControl = USART_PARITY_DISABLE,
+          .ParitySelect = USART_PARITY_DISABLE,
+          .StopBits = USART_STOP_BITS_1,
+          .OverSampling = USART_OVERSAMPLING_16};
 
   u8_t kk = 'a';
   u8_t aa[10] = "ABCDE12345";
@@ -208,7 +217,7 @@ int main(int argc, char *argv[])
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOB);
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_USART1);
   NVIC_CTRL_EnableIRQ(NVIC_IRQ_USART1);
-  USART_Init();
+  USART_Init(USART_CFG);
   GPIO_Init(USART_Pins, 2);
   LED_Init();
   GPIO_CFG_AlternateFunction(USART_Pins[0].Port, USART_Pins[0].Pin, GPIO_FUNC_AF7);

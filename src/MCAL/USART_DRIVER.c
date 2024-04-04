@@ -27,6 +27,7 @@
 #define USART_FIRST_BYTE_MASK 0x0F
 #define USART_SECOND_BYTE_MASK 0xF0
 #define USART_SR_CLEAR_MASK 0xFFFFFFFF
+#define USART_SEND_BREAK_MASK 0x00000001
 
 /********************************************************************************************************/
 /************************************************Types***************************************************/
@@ -66,7 +67,6 @@ typedef struct
 /********************************************************************************************************/
 /************************************************Variables***********************************************/
 /********************************************************************************************************/
-extern const USART_cfg_t USART_CFG[_USART_Num];
 TX_Req_t TX_Request[_USART_Num];
 RX_Req_t RX_Request[_USART_Num];
 void *USART_ADD[USART_REG_NUM] = {(void *)0x40011000, (void *)0x40004400, (void *)0x40011400};
@@ -80,7 +80,7 @@ void *USART_ADD[USART_REG_NUM] = {(void *)0x40011000, (void *)0x40004400, (void 
 /********************************************************************************************************/
 
 Error_Status
-USART_Init()
+USART_Init(USART_cfg_t USART_CfgArr)
 {
     u8_t Index;
     Error_Status LOC_Status = Status_OK;
@@ -92,41 +92,38 @@ USART_Init()
     u32_t LOC_USARTDIV;
     u32_t LOC_OverSampling;
 
-    for (Index = 0; Index < _USART_Num; Index++)
+    // get the over sampling status 1 or 0 using the USART_OVERSAMPLING_8 value
+    LOC_OverSampling = USART_CfgArr.OverSampling / USART_OVERSAMPLING_8;
+    // calculate the USARTDIV value and multiply by 1000 to get the fraction as integer
+    LOC_USARTDIV = (((u64_t)USART_CLK * 1000) / (USART_CfgArr.BaudRate * (8 * (2 - LOC_OverSampling))));
+
+    LOC_Mantissa = LOC_USARTDIV / 1000;
+    LOC_Fraction = (LOC_USARTDIV % 1000) * (8 * (2 - LOC_OverSampling));
+
+    // Check if the fraction part needs rounding
+    if (LOC_Fraction % 1000 >= 500)
     {
-        // get the over sampling status 1 or 0 using the USART_OVERSAMPLING_8 value
-        LOC_OverSampling = USART_CFG[Index].OverSampling / USART_OVERSAMPLING_8;
-        // calculate the USARTDIV value and multiply by 1000 to get the fraction as integer
-        LOC_USARTDIV = (((u64_t)USART_CLK * 1000) / (USART_CFG[Index].BaudRate * (8 * (2 - LOC_OverSampling))));
-
-        LOC_Mantissa = LOC_USARTDIV / 1000;
-        LOC_Fraction = (LOC_USARTDIV % 1000) * (8 * (2 - LOC_OverSampling));
-
-        // Check if the fraction part needs rounding
-        if (LOC_Fraction % 1000 >= 500)
-        {
-            // Round up the fraction part
-            LOC_Fraction = (LOC_Fraction / 1000) + 1;
-        }
-        else
-        {
-            LOC_Fraction = LOC_Fraction / 1000;
-        }
-        // check if there is any carry from the fraction
-        if (LOC_Fraction >= USART_FRACTION_OVERFLOW_LIMIT)
-        {
-            LOC_Mantissa += LOC_Fraction & USART_SECOND_BYTE_MASK;
-        }
-
-        LOC_BRRValue = (LOC_Mantissa << USART_4_BIT_OFFSET) | (LOC_Fraction & USART_FIRST_BYTE_MASK);
-        LOC_CR1Value = USART_PERI_ENABLE | USART_CFG[Index].WordLength | USART_CFG[Index].OverSampling;
-        LOC_CR1Value |= USART_CFG[Index].ParityControl | USART_CFG[Index].ParitySelect;
-        LOC_CR2Value = USART_CFG[Index].StopBits;
-
-        ((USART_Peri_t *)USART_ADD[USART_CFG[Index].address])->BRR = LOC_BRRValue;
-        ((USART_Peri_t *)USART_ADD[USART_CFG[Index].address])->CR1 = LOC_CR1Value;
-        ((USART_Peri_t *)USART_ADD[USART_CFG[Index].address])->CR2 = LOC_CR2Value;
+        // Round up the fraction part
+        LOC_Fraction = (LOC_Fraction / 1000) + 1;
     }
+    else
+    {
+        LOC_Fraction = LOC_Fraction / 1000;
+    }
+    // check if there is any carry from the fraction
+    if (LOC_Fraction >= USART_FRACTION_OVERFLOW_LIMIT)
+    {
+        LOC_Mantissa += LOC_Fraction & USART_SECOND_BYTE_MASK;
+    }
+
+    LOC_BRRValue = (LOC_Mantissa << USART_4_BIT_OFFSET) | (LOC_Fraction & USART_FIRST_BYTE_MASK);
+    LOC_CR1Value = USART_PERI_ENABLE | USART_CfgArr.WordLength | USART_CfgArr.OverSampling;
+    LOC_CR1Value |= USART_CfgArr.ParityControl | USART_CfgArr.ParitySelect;
+    LOC_CR2Value = USART_CfgArr.StopBits;
+
+    ((USART_Peri_t *)USART_ADD[USART_CfgArr.address])->BRR = LOC_BRRValue;
+    ((USART_Peri_t *)USART_ADD[USART_CfgArr.address])->CR1 = LOC_CR1Value;
+    ((USART_Peri_t *)USART_ADD[USART_CfgArr.address])->CR2 = LOC_CR2Value;
 
     return LOC_Status;
 }
@@ -273,6 +270,22 @@ Error_Status USART_RXBufferAsyncZC(USART_Req_t USART_Req)
 
         ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_RX_ENABLE_FLAG;
         ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_RXNEIE_ENABLE_FLAG;
+    }
+    return LOC_Status;
+}
+
+Error_Status USART_GenerateBreak(USART_Req_t USART_Req)
+{
+    Error_Status LOC_Status = Status_NOK;
+
+    if (USART_Req.buffer == NULL)
+    {
+        LOC_Status = Status_Null_Pointer;
+    }
+    else
+    {
+        LOC_Status - Status_OK;
+        ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_SEND_BREAK_MASK;
     }
     return LOC_Status;
 }
