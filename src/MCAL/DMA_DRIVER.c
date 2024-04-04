@@ -55,11 +55,24 @@
 #define DMA_FIFO_GET_FLAG 0x00000038
 #define DMA_IRQ_GET_1ST_BYTE_MASK 0x00FF
 #define DMA_IRQ_GET_2ND_BYTE_MASK 0xFF00
+#define DMA_IRQ_GET_LOW_NIB_MASK 0x00F
 #define DMA_2_GET_MASK 0x400
+#define DMA_4_BIT_OFFSET_MASK 4
+#define DMA_5_BIT_OFFSET_MASK 5
 #define DMA_10_BIT_OFFSET_MASK 10
 #define DMA_HIGH_REG 1
 #define DMA_LOW_REG 0
 #define DMA_MAX_IRQ_IDX 28
+#define DMA_LISR_THRES 3
+
+#define DMA_STRM_0_IRQ 0x00
+#define DMA_STRM_1_IRQ 0x61
+#define DMA_STRM_2_IRQ 0x102
+#define DMA_STRM_3_IRQ 0x163
+#define DMA_STRM_4_IRQ 0x04
+#define DMA_STRM_5_IRQ 0x65
+#define DMA_STRM_6_IRQ 0x106
+#define DMA_STRM_7_IRQ 0x167
 
 /********************************************************************************************************/
 /************************************************Types***************************************************/
@@ -758,126 +771,107 @@ Error_Status DMA_Set_CallBackFunction(void *DMA_Peri, u64_t DMA_Strm, Handler_t 
 static void General_IRQ_Handler(void *DMA_Peri, u8_t STRM_Num)
 {
     u8_t Iterator;
-    u8_t REG_Index = DMA_HIGH_REG;
-    u32_t IRQ_Index = 1;
+    u8_t REG_Index;
+    u8_t Start_Bit;
+    u32_t REG_Value;
+    u8_t DMA_Index;
 
-    for (Iterator = 0; Iterator < DMA_MAX_IRQ_IDX; Iterator++)
+    Start_Bit = STRM_Num >> DMA_4_BIT_OFFSET_MASK;
+    DMA_Index = ((u32_t)DMA_Peri & DMA_2_GET_MASK) >> DMA_10_BIT_OFFSET_MASK;
+    STRM_Num = STRM_Num & DMA_IRQ_GET_LOW_NIB_MASK;
+    REG_Value = (STRM_Num > DMA_LISR_THRES) ? ((DMA_Peri_t *)DMA_Peri)->HISR : ((DMA_Peri_t *)DMA_Peri)->LISR;
+    REG_Index = (STRM_Num > DMA_LISR_THRES) ? DMA_HIGH_REG : DMA_LOW_REG;
+
+    for (Iterator = Start_Bit; Iterator < (Start_Bit + DMA_5_BIT_OFFSET_MASK); Iterator++)
     {
-        if (((DMA_Peri_t *)DMA_Peri)->LISR & (IRQ_Index << Iterator))
+        if (REG_Value & (1 << Iterator))
         {
-            IRQ_Index = IRQ_Index << Iterator;
-            REG_Index = DMA_LOW_REG;
             break;
         }
     }
 
-    if (REG_Index == DMA_HIGH_REG)
+    if (IRQ_CallBackFunction[DMA_Index][(Iterator + (DMA_MAX_IRQ_IDX * REG_Index))])
     {
-        for (Iterator = 0; Iterator < DMA_MAX_IRQ_IDX; Iterator++)
-        {
-            if (((DMA_Peri_t *)DMA_Peri)->HISR & (IRQ_Index << Iterator))
-            {
-                IRQ_Index = IRQ_Index << Iterator;
-                break;
-            }
-        }
-    }
-
-    switch (REG_Index)
-    {
-    case DMA_HIGH_REG:
-        ((DMA_Peri_t *)DMA_Peri)->HIFCR = IRQ_Index;
-        break;
-    case DMA_LOW_REG:
-        ((DMA_Peri_t *)DMA_Peri)->LIFCR = IRQ_Index;
-        break;
-
-    default:
-        break;
-    }
-
-    if (IRQ_CallBackFunction[((u32_t)DMA_Peri & DMA_2_GET_MASK) >> DMA_10_BIT_OFFSET_MASK][(Iterator + (DMA_MAX_IRQ_IDX * REG_Index))])
-    {
-        IRQ_CallBackFunction[((u32_t)DMA_Peri & DMA_2_GET_MASK) >> DMA_10_BIT_OFFSET_MASK][Iterator + (DMA_MAX_IRQ_IDX * REG_Index)]();
+        IRQ_CallBackFunction[DMA_Index][Iterator + (DMA_MAX_IRQ_IDX * REG_Index)]();
     }
 }
 
 void DMA1_Stream0_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_1, DMA_STRM_0);
+    General_IRQ_Handler(DMA_1, DMA_STRM_0_IRQ);
 }
 
 void DMA1_Stream1_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_1, DMA_STRM_1);
+    General_IRQ_Handler(DMA_1, DMA_STRM_1_IRQ);
 }
 
 void DMA1_Stream2_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_1, DMA_STRM_2);
+    General_IRQ_Handler(DMA_1, DMA_STRM_2_IRQ);
 }
 
 void DMA1_Stream3_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_1, DMA_STRM_3);
+    General_IRQ_Handler(DMA_1, DMA_STRM_3_IRQ);
 }
 
 void DMA1_Stream4_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_1, DMA_STRM_4);
+    General_IRQ_Handler(DMA_1, DMA_STRM_4_IRQ);
 }
 
 void DMA1_Stream5_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_1, DMA_STRM_5);
+    General_IRQ_Handler(DMA_1, DMA_STRM_5_IRQ);
 }
 
 void DMA1_Stream6_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_1, DMA_STRM_6);
+    General_IRQ_Handler(DMA_1, DMA_STRM_6_IRQ);
 }
 
 void DMA1_Stream7_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_1, DMA_STRM_7);
+    General_IRQ_Handler(DMA_1, DMA_STRM_7_IRQ);
 }
 
 void DMA2_Stream0_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_2, DMA_STRM_0);
+    General_IRQ_Handler(DMA_2, DMA_STRM_0_IRQ);
 }
 
 void DMA2_Stream1_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_2, DMA_STRM_1);
+    General_IRQ_Handler(DMA_2, DMA_STRM_1_IRQ);
 }
 
 void DMA2_Stream2_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_2, DMA_STRM_2);
+    General_IRQ_Handler(DMA_2, DMA_STRM_2_IRQ);
 }
 
 void DMA2_Stream3_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_2, DMA_STRM_3);
+    General_IRQ_Handler(DMA_2, DMA_STRM_3_IRQ);
 }
 
 void DMA2_Stream4_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_2, DMA_STRM_4);
+    General_IRQ_Handler(DMA_2, DMA_STRM_4_IRQ);
 }
 
 void DMA2_Stream5_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_2, DMA_STRM_5);
+    General_IRQ_Handler(DMA_2, DMA_STRM_5_IRQ);
 }
 
 void DMA2_Stream6_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_2, DMA_STRM_6);
+    General_IRQ_Handler(DMA_2, DMA_STRM_6_IRQ);
 }
 
 void DMA2_Stream7_IRQHandler(void)
 {
-    General_IRQ_Handler(DMA_2, DMA_STRM_7);
+    General_IRQ_Handler(DMA_2, DMA_STRM_7_IRQ);
 }
