@@ -53,6 +53,13 @@
 
 #define DMA_CT_GET_FLAG 0x00080000
 #define DMA_FIFO_GET_FLAG 0x00000038
+#define DMA_IRQ_GET_1ST_BYTE_MASK 0x00FF
+#define DMA_IRQ_GET_2ND_BYTE_MASK 0xFF00
+#define DMA_2_GET_MASK 0x400
+#define DMA_10_BIT_OFFSET_MASK 10
+#define DMA_HIGH_REG 1
+#define DMA_LOW_REG 0
+#define DMA_MAX_IRQ_IDX 28
 
 /********************************************************************************************************/
 /************************************************Types***************************************************/
@@ -79,11 +86,11 @@ typedef struct
 /********************************************************************************************************/
 /************************************************Variables***********************************************/
 /********************************************************************************************************/
-
+Handler_t IRQ_CallBackFunction[2][56];
 /********************************************************************************************************/
 /*****************************************Static Functions Prototype*************************************/
 /********************************************************************************************************/
-
+static void General_IRQ_Handler(void *DMA_Peri, u8_t STRM_Num);
 /********************************************************************************************************/
 /*********************************************APIs Implementation****************************************/
 /********************************************************************************************************/
@@ -115,7 +122,7 @@ Error_Status DMA_CTRL_StreamEnable_Disable(void *DMA_Peri, u8_t STRM_Num, u64_t 
 Error_Status DMA_GET_InterruptStatus(void *DMA_Peri, u64_t DMA_Strm, u32_t *Status)
 {
     Error_Status LOC_Status = Status_NOK;
-    u8_t Input_Assert = DMA_Strm >> DMA_INPUT_ASSERT_OFFSET;
+    u8_t Input_Assert = (DMA_Strm >> DMA_INPUT_ASSERT_OFFSET) & DMA_IRQ_GET_1ST_BYTE_MASK;
 
     if (DMA_Peri == NULL || Status == NULL)
     {
@@ -148,7 +155,7 @@ Error_Status DMA_GET_InterruptStatus(void *DMA_Peri, u64_t DMA_Strm, u32_t *Stat
 Error_Status DMA_CTRL_ClearInterruptFlag(void *DMA_Peri, u64_t DMA_Strm)
 {
     Error_Status LOC_Status = Status_NOK;
-    u8_t Input_Assert = DMA_Strm >> DMA_INPUT_ASSERT_OFFSET;
+    u8_t Input_Assert = (DMA_Strm >> DMA_INPUT_ASSERT_OFFSET) & DMA_IRQ_GET_1ST_BYTE_MASK;
 
     if (DMA_Peri == NULL)
     {
@@ -724,4 +731,153 @@ Error_Status DMA_CFG_FIFOThreshold(void *DMA_Peri, u8_t STRM_Num, u64_t DMA_Fifo
         ((DMA_Peri_t *)DMA_Peri)->DMA_STRM_REG[STRM_Num].FCR = LOC_TempReg;
     }
     return LOC_Status;
+}
+
+Error_Status DMA_Set_CallBackFunction(void *DMA_Peri, u64_t DMA_Strm, Handler_t CB)
+{
+    Error_Status LOC_Status = Status_NOK;
+    u8_t Input_Assert = (DMA_Strm >> DMA_INPUT_ASSERT_OFFSET) & DMA_IRQ_GET_1ST_BYTE_MASK;
+    u8_t CB_Index = (DMA_Strm >> DMA_INPUT_ASSERT_OFFSET) & DMA_IRQ_GET_2ND_BYTE_MASK;
+
+    if (DMA_Peri == NULL || CB == NULL)
+    {
+        LOC_Status = Status_Null_Pointer;
+    }
+    else if (!Input_Assert || Input_Assert > DMA_GET_INT_STS_CLR_ASSERT_H_MASK)
+    {
+        LOC_Status = Status_Invalid_Input;
+    }
+    else
+    {
+        LOC_Status = Status_OK;
+        IRQ_CallBackFunction[((u32_t)DMA_Peri & DMA_2_GET_MASK) >> DMA_10_BIT_OFFSET_MASK][CB_Index] = CB;
+    }
+    return LOC_Status;
+}
+
+static void General_IRQ_Handler(void *DMA_Peri, u8_t STRM_Num)
+{
+    u8_t Iterator;
+    u8_t REG_Index = DMA_HIGH_REG;
+    u32_t IRQ_Index = 1;
+
+    for (Iterator = 0; Iterator < DMA_MAX_IRQ_IDX; Iterator++)
+    {
+        if (((DMA_Peri_t *)DMA_Peri)->LISR & (IRQ_Index << Iterator))
+        {
+            IRQ_Index = IRQ_Index << Iterator;
+            REG_Index = DMA_LOW_REG;
+            break;
+        }
+    }
+
+    if (REG_Index == DMA_HIGH_REG)
+    {
+        for (Iterator = 0; Iterator < DMA_MAX_IRQ_IDX; Iterator++)
+        {
+            if (((DMA_Peri_t *)DMA_Peri)->HISR & (IRQ_Index << Iterator))
+            {
+                IRQ_Index = IRQ_Index << Iterator;
+                break;
+            }
+        }
+    }
+
+    switch (REG_Index)
+    {
+    case DMA_HIGH_REG:
+        ((DMA_Peri_t *)DMA_Peri)->HIFCR = IRQ_Index;
+        break;
+    case DMA_LOW_REG:
+        ((DMA_Peri_t *)DMA_Peri)->LIFCR = IRQ_Index;
+        break;
+
+    default:
+        break;
+    }
+
+    if (IRQ_CallBackFunction[((u32_t)DMA_Peri & DMA_2_GET_MASK) >> DMA_10_BIT_OFFSET_MASK][(Iterator + (DMA_MAX_IRQ_IDX * REG_Index))])
+    {
+        IRQ_CallBackFunction[((u32_t)DMA_Peri & DMA_2_GET_MASK) >> DMA_10_BIT_OFFSET_MASK][Iterator + (DMA_MAX_IRQ_IDX * REG_Index)]();
+    }
+}
+
+void DMA1_Stream0_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_1, DMA_STRM_0);
+}
+
+void DMA1_Stream1_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_1, DMA_STRM_1);
+}
+
+void DMA1_Stream2_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_1, DMA_STRM_2);
+}
+
+void DMA1_Stream3_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_1, DMA_STRM_3);
+}
+
+void DMA1_Stream4_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_1, DMA_STRM_4);
+}
+
+void DMA1_Stream5_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_1, DMA_STRM_5);
+}
+
+void DMA1_Stream6_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_1, DMA_STRM_6);
+}
+
+void DMA1_Stream7_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_1, DMA_STRM_7);
+}
+
+void DMA2_Stream0_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_2, DMA_STRM_0);
+}
+
+void DMA2_Stream1_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_2, DMA_STRM_1);
+}
+
+void DMA2_Stream2_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_2, DMA_STRM_2);
+}
+
+void DMA2_Stream3_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_2, DMA_STRM_3);
+}
+
+void DMA2_Stream4_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_2, DMA_STRM_4);
+}
+
+void DMA2_Stream5_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_2, DMA_STRM_5);
+}
+
+void DMA2_Stream6_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_2, DMA_STRM_6);
+}
+
+void DMA2_Stream7_IRQHandler(void)
+{
+    General_IRQ_Handler(DMA_2, DMA_STRM_7);
 }
