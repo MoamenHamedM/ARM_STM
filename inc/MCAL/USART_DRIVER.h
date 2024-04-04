@@ -110,4 +110,15 @@ Error_Status USART_RXBufferAsyncZC(USART_Req_t USART_Req);
  */
 Error_Status USART_GenerateBreak(USART_Req_t USART_Req);
 
+/*
+ * use this function to set the callback function to be executed after a break condition
+ * parameters:
+ * USART_Peri -> the number of the USART peripheral to be assigned a callback
+ *             - USART_Peri_1, USART_Peri_2, USART_Peri_6
+ * CB         -> the address of the desired call back function
+ * return:
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_USART_Busy_Buffer
+ */
+Error_Status USART_Set_BreakCallBack(u8_t USART_Peri, CallBack_t CB);
+
 #endif // USART_DRIVER_
