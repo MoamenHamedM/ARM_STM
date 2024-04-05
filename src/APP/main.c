@@ -20,7 +20,7 @@
 #define TEST_LCD 6
 #define TEST_USART 7
 #define TEST_DMA 8
-#define APP TEST_DMA
+#define APP TEST_LCD
 
 // ----- main() ---------------------------------------------------------------
 
@@ -254,10 +254,17 @@ int main(int argc, char *argv[])
 
 void Led_On_off()
 {
+  // LED_SetState(LED_Toggle,LED_STATE_ON);
   LED_ToggleLed(LED_Toggle);
 }
 
 void LCD_Write()
 {
-  LCD_WriteStringAsync("hello", 5, Led_On_off);
+  LCD_WriteStringAsync("hello", 5, NULL);
+  LCD_SetCursorPositionAsync(0, 10, Led_On_off);
+
+  LCD_WriteStringAsync("ahmed", 5, NULL);
+  LCD_SetCursorPositionAsync(1, 5, Led_On_off);
+
+  LCD_WriteStringAsync("nour", 5, Led_On_off);
 }
