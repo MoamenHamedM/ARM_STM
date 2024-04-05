@@ -103,7 +103,7 @@ Handler_t IRQ_CallBackFunction[2][56];
 /********************************************************************************************************/
 /*****************************************Static Functions Prototype*************************************/
 /********************************************************************************************************/
-static void General_IRQ_Handler(void *DMA_Peri, u8_t STRM_Num);
+static void General_IRQ_Handler(void *DMA_Peri, u16_t STRM_Num);
 /********************************************************************************************************/
 /*********************************************APIs Implementation****************************************/
 /********************************************************************************************************/
@@ -768,7 +768,7 @@ Error_Status DMA_Set_CallBackFunction(void *DMA_Peri, u64_t DMA_Strm, Handler_t 
     return LOC_Status;
 }
 
-static void General_IRQ_Handler(void *DMA_Peri, u8_t STRM_Num)
+static void General_IRQ_Handler(void *DMA_Peri, u16_t STRM_Num)
 {
     u8_t Iterator;
     u8_t REG_Index;
