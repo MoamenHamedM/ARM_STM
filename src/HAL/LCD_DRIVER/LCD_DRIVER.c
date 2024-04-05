@@ -280,28 +280,8 @@ static void Init_State_Func()
     u8_t LOC_DisplayClearCommand = LCD_4_PIN_COMMAND_CLEAR;
     u8_t LOC_EntryModeCommand = LCD_4_PIN_COMMAND_ENTRY;
 
-//  if (Init_Call_Count < 4)
-//  {
-//      /*first call of the function set command*/
-//      LCD_WriteToPins(0x03, WRITE_COMMAND_STATE);
-//      Init_Call_Count++;
-//  }
-//
-//  else if (Init_Call_Count < 6)
-//  {
-//      /*first call of the function set command*/
-//      Init_Call_Count++;
-//  }
-//
-//  else if (Init_Call_Count < 10)
-//  {
-//      /*first call of the function set command*/
-//      LCD_WriteToPins(0x33, WRITE_COMMAND_STATE);
-//      Init_Call_Count++;
-//  }
-//
     /********************************** call the function set command **********************************/
-     if (Init_Call_Count < 4)
+    if (Init_Call_Count < 4)
     {
         /*first call of the function set command*/
         LCD_WriteToPins(LOC_FunctionSetCommand, WRITE_COMMAND_STATE);
