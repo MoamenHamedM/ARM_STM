@@ -26,6 +26,12 @@
 #define USART_STOP_BITS_2 0x00002000
 #define USART_OVERSAMPLING_16 0x00000000
 #define USART_OVERSAMPLING_8 0x00008000
+#define USART_LIN_MODE_ENABLE 0x00004000
+#define USART_LIN_MODE_DISABLE 0x00000000
+#define USART_LIN_IRQ_ENABLE 0x00000040
+#define USART_LIN_IRQ_DISABLE 0x00000000
+#define USART_LIN_BRK_LENGTH_10 0x00000000
+#define USART_LIN_BRK_LENGTH_11 0x00000020
 
 /********************************************************************************************************/
 /************************************************Types***************************************************/
@@ -42,6 +48,14 @@ typedef struct
     u32_t StopBits;
     u32_t OverSampling;
 } USART_cfg_t;
+
+typedef struct
+{
+    u8_t USART_Peri;
+    u32_t LIN_Mode;
+    u32_t LIN_IRQ;
+    u32_t LIN_BreakLength;
+} USART_LIN_cfg_t;
 
 typedef struct
 {
@@ -99,6 +113,15 @@ Error_Status USART_TXBufferAsyncZC(USART_Req_t USART_Req);
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_USART_Busy_Buffer
  */
 Error_Status USART_RXBufferAsyncZC(USART_Req_t USART_Req);
+
+/*
+ * use this function to initialize the LIN parameters in USART peripherals
+ * parameters:
+ * USART_LIN_CfgArr -> the LIN configurtion array of the desired USART
+ * return:
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input
+ */
+Error_Status USART_LIN_Init(USART_LIN_cfg_t USART_LIN_CfgArr);
 
 /*
  * use this function to generate a break condition on the USART

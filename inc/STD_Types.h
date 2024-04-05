@@ -18,7 +18,8 @@ typedef enum
     Status_Invalid_Input,
     Status_LCD_Full_Buffer,
     Status_USART_TimeOut,
-    Status_USART_Busy_Buffer
+    Status_USART_Busy_Buffer,
+    Status_LIN_OUT_SYNC
 } Error_Status;
 
 typedef signed char s8_t;
