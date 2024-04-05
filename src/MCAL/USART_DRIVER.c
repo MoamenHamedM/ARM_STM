@@ -383,7 +383,7 @@ void USART1_IRQHandler(void)
             }
         }
         /*adding the second condition to ensure the tx is not executed when the receive event happens*/
-        if (((USART_Peri_t *)USART_ADD[USART_Peri_1])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_1].state = USART_REQ_STATE_BUSY))
+        if (((USART_Peri_t *)USART_ADD[USART_Peri_1])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_1].state == USART_REQ_STATE_BUSY))
         {
             if (TX_Request[USART_Peri_1].buffer.pos < TX_Request[USART_Peri_1].buffer.size)
             {
@@ -434,7 +434,7 @@ void USART2_IRQHandler(void)
             }
         }
 
-        if (((USART_Peri_t *)USART_ADD[USART_Peri_2])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_2].state = USART_REQ_STATE_BUSY))
+        if (((USART_Peri_t *)USART_ADD[USART_Peri_2])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_2].state == USART_REQ_STATE_BUSY))
         {
             if (TX_Request[USART_Peri_2].buffer.pos < TX_Request[USART_Peri_2].buffer.size)
             {
@@ -485,7 +485,7 @@ void USART6_IRQHandler(void)
             }
         }
 
-        if (((USART_Peri_t *)USART_ADD[USART_Peri_6])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_6].state = USART_REQ_STATE_BUSY))
+        if (((USART_Peri_t *)USART_ADD[USART_Peri_6])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_6].state == USART_REQ_STATE_BUSY))
         {
             if (TX_Request[USART_Peri_6].buffer.pos < TX_Request[USART_Peri_6].buffer.size)
             {
