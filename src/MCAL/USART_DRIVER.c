@@ -362,43 +362,41 @@ void USART1_IRQHandler(void)
             BreakCallBack[USART_Peri_1]();
         }
     }
-    else
+
+    if (((USART_Peri_t *)USART_ADD[USART_Peri_1])->SR & USART_RX_DONE_IRQ && (RX_Request[USART_Peri_1].state == USART_REQ_STATE_BUSY))
     {
-        if (((USART_Peri_t *)USART_ADD[USART_Peri_1])->SR & USART_RX_DONE_IRQ)
+        if (RX_Request[USART_Peri_1].buffer.pos < RX_Request[USART_Peri_1].buffer.size)
         {
-            if (RX_Request[USART_Peri_1].buffer.pos < RX_Request[USART_Peri_1].buffer.size)
+            RX_Request[USART_Peri_1].buffer.data[RX_Request[USART_Peri_1].buffer.pos] = ((USART_Peri_t *)USART_ADD[USART_Peri_1])->DR;
+            RX_Request[USART_Peri_1].buffer.pos++;
+        }
+        else
+        {
+            ((USART_Peri_t *)USART_ADD[USART_Peri_1])->CR1 &= ~USART_RXNEIE_ENABLE_FLAG;
+            ((USART_Peri_t *)USART_ADD[USART_Peri_1])->CR1 &= ~USART_RX_ENABLE_FLAG;
+            RX_Request[USART_Peri_1].state = USART_REQ_STATE_READY;
+            if (RX_Request[USART_Peri_1].CallBack)
             {
-                RX_Request[USART_Peri_1].buffer.data[RX_Request[USART_Peri_1].buffer.pos] = ((USART_Peri_t *)USART_ADD[USART_Peri_1])->DR;
-                RX_Request[USART_Peri_1].buffer.pos++;
-            }
-            else
-            {
-                ((USART_Peri_t *)USART_ADD[USART_Peri_1])->CR1 &= ~USART_RXNEIE_ENABLE_FLAG;
-                ((USART_Peri_t *)USART_ADD[USART_Peri_1])->CR1 &= ~USART_RX_ENABLE_FLAG;
-                RX_Request[USART_Peri_1].state = USART_REQ_STATE_READY;
-                if (RX_Request[USART_Peri_1].CallBack)
-                {
-                    RX_Request[USART_Peri_1].CallBack();
-                }
+                RX_Request[USART_Peri_1].CallBack();
             }
         }
-        /*adding the second condition to ensure the tx is not executed when the receive event happens*/
-        if (((USART_Peri_t *)USART_ADD[USART_Peri_1])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_1].state == USART_REQ_STATE_BUSY))
+    }
+    /*adding the second condition to ensure the tx is not executed when the receive event happens*/
+    if (((USART_Peri_t *)USART_ADD[USART_Peri_1])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_1].state == USART_REQ_STATE_BUSY))
+    {
+        if (TX_Request[USART_Peri_1].buffer.pos < TX_Request[USART_Peri_1].buffer.size)
         {
-            if (TX_Request[USART_Peri_1].buffer.pos < TX_Request[USART_Peri_1].buffer.size)
+            ((USART_Peri_t *)USART_ADD[USART_Peri_1])->DR = TX_Request[USART_Peri_1].buffer.data[TX_Request[USART_Peri_1].buffer.pos];
+            TX_Request[USART_Peri_1].buffer.pos++;
+        }
+        else
+        {
+            ((USART_Peri_t *)USART_ADD[USART_Peri_1])->CR1 &= ~USART_TXEIE_ENABLE_FLAG;
+            ((USART_Peri_t *)USART_ADD[USART_Peri_1])->CR1 &= ~USART_TX_ENABLE_FLAG;
+            TX_Request[USART_Peri_1].state = USART_REQ_STATE_READY;
+            if (TX_Request[USART_Peri_1].CallBack)
             {
-                ((USART_Peri_t *)USART_ADD[USART_Peri_1])->DR = TX_Request[USART_Peri_1].buffer.data[TX_Request[USART_Peri_1].buffer.pos];
-                TX_Request[USART_Peri_1].buffer.pos++;
-            }
-            else
-            {
-                ((USART_Peri_t *)USART_ADD[USART_Peri_1])->CR1 &= ~USART_TXEIE_ENABLE_FLAG;
-                ((USART_Peri_t *)USART_ADD[USART_Peri_1])->CR1 &= ~USART_TX_ENABLE_FLAG;
-                TX_Request[USART_Peri_1].state = USART_REQ_STATE_READY;
-                if (TX_Request[USART_Peri_1].CallBack)
-                {
-                    TX_Request[USART_Peri_1].CallBack();
-                }
+                TX_Request[USART_Peri_1].CallBack();
             }
         }
     }
@@ -413,43 +411,41 @@ void USART2_IRQHandler(void)
             BreakCallBack[USART_Peri_2]();
         }
     }
-    else
+
+    if (((USART_Peri_t *)USART_ADD[USART_Peri_2])->SR & USART_RX_DONE_IRQ && (RX_Request[USART_Peri_2].state == USART_REQ_STATE_BUSY))
     {
-        if (((USART_Peri_t *)USART_ADD[USART_Peri_2])->SR & USART_RX_DONE_IRQ)
+        if (RX_Request[USART_Peri_2].buffer.pos < RX_Request[USART_Peri_2].buffer.size)
         {
-            if (RX_Request[USART_Peri_2].buffer.pos < RX_Request[USART_Peri_2].buffer.size)
+            RX_Request[USART_Peri_2].buffer.data[RX_Request[USART_Peri_2].buffer.pos] = ((USART_Peri_t *)USART_ADD[USART_Peri_2])->DR;
+            RX_Request[USART_Peri_2].buffer.pos++;
+        }
+        else
+        {
+            ((USART_Peri_t *)USART_ADD[USART_Peri_2])->CR1 &= ~USART_RXNEIE_ENABLE_FLAG;
+            ((USART_Peri_t *)USART_ADD[USART_Peri_2])->CR1 &= ~USART_RX_ENABLE_FLAG;
+            RX_Request[USART_Peri_2].state = USART_REQ_STATE_READY;
+            if (RX_Request[USART_Peri_2].CallBack)
             {
-                RX_Request[USART_Peri_2].buffer.data[RX_Request[USART_Peri_2].buffer.pos] = ((USART_Peri_t *)USART_ADD[USART_Peri_2])->DR;
-                RX_Request[USART_Peri_2].buffer.pos++;
-            }
-            else
-            {
-                ((USART_Peri_t *)USART_ADD[USART_Peri_2])->CR1 &= ~USART_RXNEIE_ENABLE_FLAG;
-                ((USART_Peri_t *)USART_ADD[USART_Peri_2])->CR1 &= ~USART_RX_ENABLE_FLAG;
-                RX_Request[USART_Peri_2].state = USART_REQ_STATE_READY;
-                if (RX_Request[USART_Peri_2].CallBack)
-                {
-                    RX_Request[USART_Peri_2].CallBack();
-                }
+                RX_Request[USART_Peri_2].CallBack();
             }
         }
+    }
 
-        if (((USART_Peri_t *)USART_ADD[USART_Peri_2])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_2].state == USART_REQ_STATE_BUSY))
+    if (((USART_Peri_t *)USART_ADD[USART_Peri_2])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_2].state == USART_REQ_STATE_BUSY))
+    {
+        if (TX_Request[USART_Peri_2].buffer.pos < TX_Request[USART_Peri_2].buffer.size)
         {
-            if (TX_Request[USART_Peri_2].buffer.pos < TX_Request[USART_Peri_2].buffer.size)
+            ((USART_Peri_t *)USART_ADD[USART_Peri_2])->DR = TX_Request[USART_Peri_2].buffer.data[TX_Request[USART_Peri_2].buffer.pos];
+            TX_Request[USART_Peri_2].buffer.pos++;
+        }
+        else
+        {
+            ((USART_Peri_t *)USART_ADD[USART_Peri_2])->CR1 &= ~USART_TXEIE_ENABLE_FLAG;
+            ((USART_Peri_t *)USART_ADD[USART_Peri_2])->CR1 &= ~USART_TX_ENABLE_FLAG;
+            TX_Request[USART_Peri_2].state = USART_REQ_STATE_READY;
+            if (TX_Request[USART_Peri_2].CallBack)
             {
-                ((USART_Peri_t *)USART_ADD[USART_Peri_2])->DR = TX_Request[USART_Peri_2].buffer.data[TX_Request[USART_Peri_2].buffer.pos];
-                TX_Request[USART_Peri_2].buffer.pos++;
-            }
-            else
-            {
-                ((USART_Peri_t *)USART_ADD[USART_Peri_2])->CR1 &= ~USART_TXEIE_ENABLE_FLAG;
-                ((USART_Peri_t *)USART_ADD[USART_Peri_2])->CR1 &= ~USART_TX_ENABLE_FLAG;
-                TX_Request[USART_Peri_2].state = USART_REQ_STATE_READY;
-                if (TX_Request[USART_Peri_2].CallBack)
-                {
-                    TX_Request[USART_Peri_2].CallBack();
-                }
+                TX_Request[USART_Peri_2].CallBack();
             }
         }
     }
@@ -464,43 +460,41 @@ void USART6_IRQHandler(void)
             BreakCallBack[USART_Peri_6]();
         }
     }
-    else
+
+    if (((USART_Peri_t *)USART_ADD[USART_Peri_6])->SR & USART_RX_DONE_IRQ && (TX_Request[USART_Peri_6].state == USART_REQ_STATE_BUSY))
     {
-        if (((USART_Peri_t *)USART_ADD[USART_Peri_6])->SR & USART_RX_DONE_IRQ)
+        if (RX_Request[USART_Peri_6].buffer.pos < RX_Request[USART_Peri_6].buffer.size)
         {
-            if (RX_Request[USART_Peri_6].buffer.pos < RX_Request[USART_Peri_6].buffer.size)
+            RX_Request[USART_Peri_6].buffer.data[RX_Request[USART_Peri_6].buffer.pos] = ((USART_Peri_t *)USART_ADD[USART_Peri_6])->DR;
+            RX_Request[USART_Peri_6].buffer.pos++;
+        }
+        else
+        {
+            ((USART_Peri_t *)USART_ADD[USART_Peri_6])->CR1 &= ~USART_RXNEIE_ENABLE_FLAG;
+            ((USART_Peri_t *)USART_ADD[USART_Peri_6])->CR1 &= ~USART_RX_ENABLE_FLAG;
+            RX_Request[USART_Peri_6].state = USART_REQ_STATE_READY;
+            if (RX_Request[USART_Peri_6].CallBack)
             {
-                RX_Request[USART_Peri_6].buffer.data[RX_Request[USART_Peri_6].buffer.pos] = ((USART_Peri_t *)USART_ADD[USART_Peri_6])->DR;
-                RX_Request[USART_Peri_6].buffer.pos++;
-            }
-            else
-            {
-                ((USART_Peri_t *)USART_ADD[USART_Peri_6])->CR1 &= ~USART_RXNEIE_ENABLE_FLAG;
-                ((USART_Peri_t *)USART_ADD[USART_Peri_6])->CR1 &= ~USART_RX_ENABLE_FLAG;
-                RX_Request[USART_Peri_6].state = USART_REQ_STATE_READY;
-                if (RX_Request[USART_Peri_6].CallBack)
-                {
-                    RX_Request[USART_Peri_6].CallBack();
-                }
+                RX_Request[USART_Peri_6].CallBack();
             }
         }
+    }
 
-        if (((USART_Peri_t *)USART_ADD[USART_Peri_6])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_6].state == USART_REQ_STATE_BUSY))
+    if (((USART_Peri_t *)USART_ADD[USART_Peri_6])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_6].state == USART_REQ_STATE_BUSY))
+    {
+        if (TX_Request[USART_Peri_6].buffer.pos < TX_Request[USART_Peri_6].buffer.size)
         {
-            if (TX_Request[USART_Peri_6].buffer.pos < TX_Request[USART_Peri_6].buffer.size)
+            ((USART_Peri_t *)USART_ADD[USART_Peri_6])->DR = TX_Request[USART_Peri_6].buffer.data[TX_Request[USART_Peri_6].buffer.pos];
+            TX_Request[USART_Peri_6].buffer.pos++;
+        }
+        else
+        {
+            ((USART_Peri_t *)USART_ADD[USART_Peri_6])->CR1 &= ~USART_TXEIE_ENABLE_FLAG;
+            ((USART_Peri_t *)USART_ADD[USART_Peri_6])->CR1 &= ~USART_TX_ENABLE_FLAG;
+            TX_Request[USART_Peri_6].state = USART_REQ_STATE_READY;
+            if (TX_Request[USART_Peri_6].CallBack)
             {
-                ((USART_Peri_t *)USART_ADD[USART_Peri_6])->DR = TX_Request[USART_Peri_6].buffer.data[TX_Request[USART_Peri_6].buffer.pos];
-                TX_Request[USART_Peri_6].buffer.pos++;
-            }
-            else
-            {
-                ((USART_Peri_t *)USART_ADD[USART_Peri_6])->CR1 &= ~USART_TXEIE_ENABLE_FLAG;
-                ((USART_Peri_t *)USART_ADD[USART_Peri_6])->CR1 &= ~USART_TX_ENABLE_FLAG;
-                TX_Request[USART_Peri_6].state = USART_REQ_STATE_READY;
-                if (TX_Request[USART_Peri_6].CallBack)
-                {
-                    TX_Request[USART_Peri_6].CallBack();
-                }
+                TX_Request[USART_Peri_6].CallBack();
             }
         }
     }
