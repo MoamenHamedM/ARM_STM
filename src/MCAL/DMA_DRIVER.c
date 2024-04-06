@@ -790,7 +790,7 @@ static void General_IRQ_Handler(void *DMA_Peri, u16_t STRM_Num)
         }
     }
 
-    if (IRQ_CallBackFunction[DMA_Index][(Iterator + (DMA_MAX_IRQ_IDX * REG_Index))])
+    if (IRQ_CallBackFunction[DMA_Index][Iterator + (DMA_MAX_IRQ_IDX * REG_Index)])
     {
         IRQ_CallBackFunction[DMA_Index][Iterator + (DMA_MAX_IRQ_IDX * REG_Index)]();
     }

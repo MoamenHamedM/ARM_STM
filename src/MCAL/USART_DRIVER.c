@@ -325,7 +325,7 @@ Error_Status USART_GenerateBreak(USART_Req_t USART_Req)
     }
     else
     {
-        LOC_Status - Status_OK;
+        LOC_Status = Status_OK;
         /*enable break detection?*/
         ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_SEND_BREAK_MASK;
     }
