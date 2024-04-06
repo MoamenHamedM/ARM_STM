@@ -500,9 +500,9 @@ static void OperationState_WriteFunc()
         //       /*do nothing*/
         //   }
 
-        if (User_Resquest[User_CurrentRequest].CallBack)
+        if (User_CurrentRequest && User_Resquest[User_CurrentRequest - 1].CallBack)
         {
-            User_Resquest[User_CurrentRequest].CallBack();
+            User_Resquest[User_CurrentRequest - 1].CallBack();
         }
     }
 }
@@ -577,10 +577,10 @@ static void OperationState_WriteFunc()
         //        /*do nothing*/
         //    }
 
-        if (User_Resquest[User_CurrentRequest].CallBack)
+        if (User_CurrentRequest && User_Resquest[User_CurrentRequest - 1].CallBack)
         {
             // GPIO_Set_PinValue(GPIO_PORT_A,GPIO_PIN_11,GPIO_STATE_SET);
-            User_Resquest[User_CurrentRequest].CallBack();
+            User_Resquest[User_CurrentRequest - 1].CallBack();
         }
     }
 }
@@ -611,9 +611,9 @@ static void OperationState_ClearFunc()
 
         LCD_SetCursorPositionAsync(0, 0, NULL);
 
-        if (User_Resquest[User_CurrentRequest].CallBack)
+        if (User_CurrentRequest && User_Resquest[User_CurrentRequest - 1].CallBack)
         {
-            User_Resquest[User_CurrentRequest].CallBack();
+            User_Resquest[User_CurrentRequest - 1].CallBack();
         }
         break;
 
@@ -658,9 +658,9 @@ static void OperationState_ClearFunc()
 
             LCD_SetCursorPositionAsync(0, 0, NULL);
 
-            if (User_Resquest[User_CurrentRequest].CallBack)
+            if (User_CurrentRequest && User_Resquest[User_CurrentRequest - 1].CallBack)
             {
-                User_Resquest[User_CurrentRequest].CallBack();
+                User_Resquest[User_CurrentRequest - 1].CallBack();
             }
         }
         else
@@ -710,9 +710,9 @@ static void OperationState_SetPFunc()
             User_CurrentRequest = 0;
         }
 
-        if (User_Resquest[User_CurrentRequest].CallBack)
+        if (User_CurrentRequest && User_Resquest[User_CurrentRequest - 1].CallBack)
         {
-            User_Resquest[User_CurrentRequest].CallBack();
+            User_Resquest[User_CurrentRequest - 1].CallBack();
         }
         break;
 
@@ -770,9 +770,9 @@ static void OperationState_SetPFunc()
             }
             CommandState = 0;
 
-            if (User_Resquest[User_CurrentRequest].CallBack)
+            if (User_CurrentRequest && User_Resquest[User_CurrentRequest - 1].CallBack)
             {
-                User_Resquest[User_CurrentRequest].CallBack();
+                User_Resquest[User_CurrentRequest - 1].CallBack();
             }
         }
         else
