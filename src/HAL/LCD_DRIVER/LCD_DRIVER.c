@@ -13,7 +13,7 @@
 #define LCD_REQ_TYPE_WRITE 0
 #define LCD_REQ_TYPE_CLEAR 1
 #define LCD_REQ_TYPE_SET_P 2
-#define LCD_MAX_BUFFER_SIZE 5
+#define LCD_MAX_BUFFER_SIZE 10
 #define STATIC_STATE_BUSY 0
 #define STATIC_STATE_READY 1
 #define COMMAND_NIBBLE_HIGH 1
@@ -43,6 +43,29 @@
 /********************************************************************************************************/
 typedef struct
 {
+    union
+    {
+        struct
+        {
+            const u8_t *U_string;
+            u8_t U_length;
+            u8_t Curr_Pos;
+        } Write_Req;
+
+        struct
+        {
+            u8_t X_Position;
+            u8_t Y_Position;
+        } SetP_Req;
+    } Request;
+
+    u8_t U_State;
+    u8_t U_Type;
+    CallBack_t CallBack;
+} User_Req_t;
+/*
+typedef struct
+{
     const u8_t *U_string;
     u8_t U_length;
     u8_t U_State;
@@ -52,7 +75,7 @@ typedef struct
     u8_t Curr_Pos;
     CallBack_t CallBack;
 } User_Req_t;
-
+*/
 /*
 typedef struct
 {
@@ -139,9 +162,9 @@ Error_Status LCD_WriteStringAsync(u8_t *string, u8_t length, CallBack_t CB)
     {
         if (User_Resquest[Index].U_State == LCD_USER_STATE_READY)
         {
-            User_Resquest[Index].U_string = string;
-            User_Resquest[Index].U_length = length;
-            User_Resquest[Index].Curr_Pos = 0;
+            User_Resquest[Index].Request.Write_Req.U_string = string;
+            User_Resquest[Index].Request.Write_Req.U_length = length;
+            User_Resquest[Index].Request.Write_Req.Curr_Pos = 0;
             User_Resquest[Index].CallBack = CB;
             User_Resquest[Index].U_Type = LCD_REQ_TYPE_WRITE;
             User_Resquest[Index].U_State = LCD_USER_STATE_BUSY;
@@ -170,8 +193,8 @@ Error_Status LCD_SetCursorPositionAsync(u8_t X_pos, u8_t Y_pos, CallBack_t CB)
     {
         if (User_Resquest[Index].U_State == LCD_USER_STATE_READY)
         {
-            User_Resquest[Index].X_Position = X_pos;
-            User_Resquest[Index].Y_Position = Y_pos;
+            User_Resquest[Index].Request.SetP_Req.X_Position = X_pos;
+            User_Resquest[Index].Request.SetP_Req.Y_Position = Y_pos;
             User_Resquest[Index].CallBack = CB;
             User_Resquest[Index].U_Type = LCD_REQ_TYPE_SET_P;
             User_Resquest[Index].U_State = LCD_USER_STATE_BUSY;
@@ -452,18 +475,18 @@ static void OperationState_WriteFunc()
 {
     static u8_t write_state = STATIC_STATE_READY;
 
-    if (User_Resquest[User_CurrentRequest].Curr_Pos < User_Resquest[User_CurrentRequest].U_length)
+    if (User_Resquest[User_CurrentRequest].Request.Write_Req.Curr_Pos < User_Resquest[User_CurrentRequest].Request.Write_Req.U_length)
     {
         switch (write_state)
         {
         case STATIC_STATE_READY:
-            LCD_WriteToPins(*(User_Resquest[User_CurrentRequest].U_string + User_Resquest[User_CurrentRequest].Curr_Pos), WRITE_DATA_STATE);
+            LCD_WriteToPins(*(User_Resquest[User_CurrentRequest].Request.Write_Req.U_string + User_Resquest[User_CurrentRequest].Request.Write_Req.Curr_Pos), WRITE_DATA_STATE);
             write_state = STATIC_STATE_BUSY;
             break;
         case STATIC_STATE_BUSY:
-            LCD_WriteToPins(*(User_Resquest[User_CurrentRequest].U_string + User_Resquest[User_CurrentRequest].Curr_Pos), WRITE_DATA_STATE);
+            LCD_WriteToPins(*(User_Resquest[User_CurrentRequest].Request.Write_Req.U_string + User_Resquest[User_CurrentRequest].Request.Write_Req.Curr_Pos), WRITE_DATA_STATE);
             write_state = STATIC_STATE_READY;
-            User_Resquest[User_CurrentRequest].Curr_Pos++;
+            User_Resquest[User_CurrentRequest].Request.Write_Req.Curr_Pos++;
             break;
 
         default:
@@ -473,7 +496,7 @@ static void OperationState_WriteFunc()
     else
     {
         User_Resquest[User_CurrentRequest].U_State = LCD_USER_STATE_READY;
-        User_Resquest[User_CurrentRequest].Curr_Pos = 0;
+        User_Resquest[User_CurrentRequest].Request.Write_Req.Curr_Pos = 0;
 
         User_CurrentRequest++;
         if (User_Resquest[User_CurrentRequest].U_State == LCD_USER_STATE_READY || User_CurrentRequest == LCD_MAX_BUFFER_SIZE)
@@ -513,12 +536,12 @@ static void OperationState_WriteFunc()
 {
     static u8_t write_state = STATIC_STATE_READY;
     static u8_t CommandState = 0;
-    if (User_Resquest[User_CurrentRequest].Curr_Pos < User_Resquest[User_CurrentRequest].U_length)
+    if (User_Resquest[User_CurrentRequest].Request.Write_Req.Curr_Pos < User_Resquest[User_CurrentRequest].Request.Write_Req.U_length)
     {
         switch (write_state)
         {
         case STATIC_STATE_READY:
-            LCD_WriteToPins(*(User_Resquest[User_CurrentRequest].U_string + User_Resquest[User_CurrentRequest].Curr_Pos), WRITE_DATA_STATE);
+            LCD_WriteToPins(*(User_Resquest[User_CurrentRequest].Request.Write_Req.U_string + User_Resquest[User_CurrentRequest].Request.Write_Req.Curr_Pos), WRITE_DATA_STATE);
             if (CommandState)
             {
                 write_state = STATIC_STATE_BUSY;
@@ -530,11 +553,11 @@ static void OperationState_WriteFunc()
             }
             break;
         case STATIC_STATE_BUSY:
-            LCD_WriteToPins(*(User_Resquest[User_CurrentRequest].U_string + User_Resquest[User_CurrentRequest].Curr_Pos), WRITE_DATA_STATE);
+            LCD_WriteToPins(*(User_Resquest[User_CurrentRequest].Request.Write_Req.U_string + User_Resquest[User_CurrentRequest].Request.Write_Req.Curr_Pos), WRITE_DATA_STATE);
             if (CommandState)
             {
                 write_state = STATIC_STATE_READY;
-                User_Resquest[User_CurrentRequest].Curr_Pos++;
+                User_Resquest[User_CurrentRequest].Request.Write_Req.Curr_Pos++;
                 CommandState = 0;
             }
             else
@@ -550,7 +573,7 @@ static void OperationState_WriteFunc()
     else
     {
         User_Resquest[User_CurrentRequest].U_State = LCD_USER_STATE_READY;
-        User_Resquest[User_CurrentRequest].Curr_Pos = 0;
+        User_Resquest[User_CurrentRequest].Request.Write_Req.Curr_Pos = 0;
 
         User_CurrentRequest++;
         if (User_Resquest[User_CurrentRequest].U_State == LCD_USER_STATE_READY || User_CurrentRequest == LCD_MAX_BUFFER_SIZE)
@@ -682,13 +705,13 @@ static void OperationState_SetPFunc()
     u8_t LOC_Location = LCD_COMMAND_GOTOXY;
 
     /*check if the location is in the first line*/
-    if (User_Resquest[User_CurrentRequest].X_Position == 0)
+    if (User_Resquest[User_CurrentRequest].Request.SetP_Req.X_Position == 0)
     {
-        LOC_Location += User_Resquest[User_CurrentRequest].Y_Position;
+        LOC_Location += User_Resquest[User_CurrentRequest].Request.SetP_Req.Y_Position;
     }
     else
     {
-        LOC_Location += (User_Resquest[User_CurrentRequest].Y_Position + LCD_SECOND_LINE_OFFSET);
+        LOC_Location += (User_Resquest[User_CurrentRequest].Request.SetP_Req.Y_Position + LCD_SECOND_LINE_OFFSET);
     }
 
     switch (SetPState)
@@ -699,8 +722,8 @@ static void OperationState_SetPFunc()
         break;
     case STATIC_STATE_BUSY:
         LCD_WriteToPins(LOC_Location, WRITE_COMMAND_STATE);
-        User_Resquest[User_CurrentRequest].X_Position = 0;
-        User_Resquest[User_CurrentRequest].Y_Position = 0;
+        User_Resquest[User_CurrentRequest].Request.SetP_Req.X_Position = 0;
+        User_Resquest[User_CurrentRequest].Request.SetP_Req.Y_Position = 0;
         SetPState = STATIC_STATE_READY;
         User_Resquest[User_CurrentRequest].U_State = LCD_USER_STATE_READY;
 
@@ -731,13 +754,13 @@ static void OperationState_SetPFunc()
     static u8_t CommandState = 0;
 
     /*check if the location is in the first line*/
-    if (User_Resquest[User_CurrentRequest].X_Position == 0)
+    if (User_Resquest[User_CurrentRequest].Request.SetP_Req.X_Position == 0)
     {
-        LOC_Location += User_Resquest[User_CurrentRequest].Y_Position;
+        LOC_Location += User_Resquest[User_CurrentRequest].Request.SetP_Req.Y_Position;
     }
     else
     {
-        LOC_Location += (User_Resquest[User_CurrentRequest].Y_Position + LCD_SECOND_LINE_OFFSET);
+        LOC_Location += (User_Resquest[User_CurrentRequest].Request.SetP_Req.Y_Position + LCD_SECOND_LINE_OFFSET);
     }
 
     switch (SetPState)
@@ -758,8 +781,8 @@ static void OperationState_SetPFunc()
         if (CommandState)
         {
             LCD_WriteToPins(LOC_Location, WRITE_COMMAND_STATE);
-            User_Resquest[User_CurrentRequest].X_Position = 0;
-            User_Resquest[User_CurrentRequest].Y_Position = 0;
+            User_Resquest[User_CurrentRequest].Request.SetP_Req.X_Position = 0;
+            User_Resquest[User_CurrentRequest].Request.SetP_Req.Y_Position = 0;
             SetPState = STATIC_STATE_READY;
             User_Resquest[User_CurrentRequest].U_State = LCD_USER_STATE_READY;
 

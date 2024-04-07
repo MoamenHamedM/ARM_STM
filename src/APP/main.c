@@ -260,11 +260,19 @@ void Led_On_off()
 
 void LCD_Write()
 {
-  LCD_WriteStringAsync("hello", 5, NULL);
-  LCD_SetCursorPositionAsync(0, 10, Led_On_off);
+  LCD_WriteStringAsync("hello", 5, Led_On_off);
+  LCD_SetCursorPositionAsync(0, 10, NULL);
 
   LCD_WriteStringAsync("ahmed", 5, NULL);
-  LCD_SetCursorPositionAsync(1, 5, Led_On_off);
+  LCD_SetCursorPositionAsync(0, 10, NULL);
 
-  LCD_WriteStringAsync("nour", 5, Led_On_off);
+  LCD_WriteStringAsync("nour", 5, NULL);
+
+  LCD_WriteStringAsync("hello", 5, Led_On_off);
+  LCD_SetCursorPositionAsync(1, 0, NULL);
+
+  LCD_WriteStringAsync("ahmed", 5, NULL);
+  LCD_SetCursorPositionAsync(1, 8, NULL);
+
+  LCD_WriteStringAsync("nour", 5, NULL);
 }
