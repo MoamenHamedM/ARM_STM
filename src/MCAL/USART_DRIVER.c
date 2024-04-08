@@ -315,19 +315,19 @@ Error_Status USART_LIN_Init(USART_LIN_cfg_t USART_LIN_CfgArr)
     return LOC_Status;
 }
 
-Error_Status USART_GenerateBreak(USART_Req_t USART_Req)
+Error_Status USART_GenerateBreak(u8_t USART_Peri)
 {
     Error_Status LOC_Status = Status_NOK;
 
-    if (USART_Req.buffer == NULL)
+    if (USART_Peri > USART_Peri_6)
     {
-        LOC_Status = Status_Null_Pointer;
+        LOC_Status = Status_Invalid_Input;
     }
     else
     {
         LOC_Status = Status_OK;
         /*enable break detection?*/
-        ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_SEND_BREAK_MASK;
+        ((USART_Peri_t *)USART_ADD[USART_Peri])->CR1 |= USART_SEND_BREAK_MASK;
     }
     return LOC_Status;
 }

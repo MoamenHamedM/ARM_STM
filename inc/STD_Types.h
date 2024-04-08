@@ -19,7 +19,8 @@ typedef enum
     Status_LCD_Full_Buffer,
     Status_USART_TimeOut,
     Status_USART_Busy_Buffer,
-    Status_LIN_OUT_SYNC
+    Status_LIN_OUT_SYNC,
+    Status_LIN_WRONG_CHK_SUM
 } Error_Status;
 
 typedef signed char s8_t;

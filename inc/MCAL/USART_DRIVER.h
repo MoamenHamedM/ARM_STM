@@ -131,7 +131,7 @@ Error_Status USART_LIN_Init(USART_LIN_cfg_t USART_LIN_CfgArr);
  * return:
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_USART_Busy_Buffer
  */
-Error_Status USART_GenerateBreak(USART_Req_t USART_Req);
+Error_Status USART_GenerateBreak(u8_t USART_Peri);
 
 /*
  * use this function to set the callback function to be executed after a break condition

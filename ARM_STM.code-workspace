@@ -11,7 +11,11 @@
       "systick_driver.h": "c",
       "nvic_driver.h": "c",
       "app1_3_statemachine": "c",
-      "sw.h": "c"
+      "sw.h": "c",
+      "lin_types.h": "c",
+      "lin_slave.h": "c",
+      "lin_master_config.h": "c",
+      "gpio_driver.h": "c"
     }
   }
 }
