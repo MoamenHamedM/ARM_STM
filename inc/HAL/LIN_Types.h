@@ -36,6 +36,7 @@ typedef struct
     u8_t Start_Index;
     u8_t Length;
     LIN_Message_t *Message;
+    u8_t *Value;
 } LIN_Signal_t;
 
 typedef enum

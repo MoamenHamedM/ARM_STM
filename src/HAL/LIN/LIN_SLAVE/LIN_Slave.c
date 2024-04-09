@@ -242,3 +242,98 @@ static u8_t Calculate_Checksum(u8_t PID, u8_t *Data, u8_t Size)
     CheckSum = LIN_CHK_SUM_INVERSION_MASK - CheckSum;
     return CheckSum;
 }
+
+Error_Status LIN_Assign_DatatoMSGSignal(LIN_Message_t *MSG, u8_t *Values, u8_t Values_Num)
+{
+    Error_Status LOC_Status = Status_NOK;
+    u8_t Index;
+    if (MSG == NULL || Values == NULL)
+    {
+        LOC_Status = Status_Null_Pointer;
+    }
+    else if (Values_Num > MSG->Signals_Num)
+    {
+        LOC_Status = Status_Invalid_Input;
+    }
+    else
+    {
+        LOC_Status = Status_OK;
+        for (Index = 0; Index < Values_Num; Index++)
+        {
+            /*is the user required to know the sequence of the signal?*/
+            MSG->Signals[Index]->Value = Values[Index];
+        }
+    }
+    return LOC_Status;
+}
+
+Error_Status LIN_Publish_DataToMSG(LIN_Message_t *MSG)
+{
+    Error_Status LOC_Status = Status_NOK;
+    u8_t Index;
+    u8_t value;
+    u8_t Byte_Index;
+
+    if (MSG == NULL || MSG->Data == NULL || MSG->Signals == NULL)
+    {
+        LOC_Status = Status_Null_Pointer;
+    }
+    else
+    {
+        LOC_Status = Status_OK;
+        for (Index = 0; Index < MSG->Signals_Num; Index++)
+        {
+            /*
+            value = *(MSG->Signals[Index]->Value);
+
+            // Get the desired bit length
+            value &= ((1 << MSG->Signals[Index]->Length) - 1);
+
+            // Clear the desired bits in the data array
+            *(MSG->Data) &= ~(((1 << MSG->Signals[Index]->Length) - 1) << (8 * (MSG->Data_Length - 1) - MSG->Signals[Index]->Start_Index - MSG->Signals[Index]->Length + 1));
+
+            // Update the data array with the value
+            *(MSG->Data) |= (value << (8 * (MSG->Data_Length - 1) - MSG->Signals[Index]->Start_Index - MSG->Signals[Index]->Length + 1));
+            */
+            Byte_Index = (MSG->Signals[Index]->Start_Index / 8);
+
+            MSG->Data[Byte_Index] = 0;
+
+            MSG->Data[Byte_Index] = *(MSG->Signals[Index]->Value);
+        }
+    }
+    return LOC_Status;
+}
+
+Error_Status LIN_Collect_DatafromMSG(LIN_Message_t *MSG)
+{
+    Error_Status LOC_Status = Status_NOK;
+    u8_t Index;
+    u8_t value;
+    u8_t Byte_Index;
+
+    if (MSG == NULL || MSG->Data == NULL || MSG->Signals == NULL)
+    {
+        LOC_Status = Status_Null_Pointer;
+    }
+    else
+    {
+        LOC_Status = Status_OK;
+        for (Index = 0; Index < MSG->Signals_Num; Index++)
+        {
+            /*
+            value = *(MSG->Data);
+            // Extract the relevant bits from the data array
+            value >>= (8 * (MSG->Data_Length - 1) - MSG->Signals[Index]->Start_Index - MSG->Signals[Index]->Length + 1);
+            value &= ((1 << MSG->Signals[Index]->Length) - 1);
+
+            // Update the variable pointed by Value with the extracted value
+            *((u8_t *)MSG->Signals[Index]->Value) = value;
+            */
+            Byte_Index = (MSG->Signals[Index]->Start_Index / 8);
+
+            MSG->Signals[Index]->Value = MSG->Data[Byte_Index];
+        }
+    }
+    return LOC_Status;
+}

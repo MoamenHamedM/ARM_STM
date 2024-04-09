@@ -14,7 +14,7 @@ static const LIN_Signal_t Signals[3] =
 
 const LIN_Message_t Slave1_Messages[_SLAVE1_MSG_NUM] =
     {
-        [First_MSG] =
+        [First_SMSG] =
             {
                 .ID = 0x7,
                 .PID = 0x47,
@@ -26,7 +26,7 @@ const LIN_Message_t Slave1_Messages[_SLAVE1_MSG_NUM] =
                 .Signals[1] = &Signals[2]
 
             },
-        [Second_MSG] =
+        [Second_SMSG] =
             {
                 .ID = 0x5,
                 .PID = 0x45,
