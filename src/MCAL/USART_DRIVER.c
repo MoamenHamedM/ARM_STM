@@ -4,10 +4,10 @@
 /************************************************Includes************************************************/
 /********************************************************************************************************/
 #include "MCAL/USART_DRIVER.h"
-
 /********************************************************************************************************/
 /************************************************Defines*************************************************/
 /********************************************************************************************************/
+
 // #define USART_BUADRATE_MASK 0x0000FFFF
 #define USART_PERI_NUM 3
 #define USART_PERI_ENABLE 0x00002000
@@ -71,7 +71,7 @@ typedef struct
 /********************************************************************************************************/
 TX_Req_t TX_Request[USART_PERI_NUM];
 RX_Req_t RX_Request[USART_PERI_NUM];
-void *USART_ADD[USART_REG_NUM] = {(void *)0x40011000, (void *)0x40004400, (void *)0x40011400};
+USART_Peri_t *USART_ADD[USART_REG_NUM] = {(USART_Peri_t *)0x40011000, (USART_Peri_t *)0x40004400, (USART_Peri_t *)0x40011400};
 CallBack_t BreakCallBack[USART_PERI_NUM];
 /********************************************************************************************************/
 /*****************************************Static Functions Prototype*************************************/
@@ -134,12 +134,12 @@ USART_Init(USART_cfg_t USART_CfgArr)
 
         LOC_BRRValue = (LOC_Mantissa << USART_4_BIT_OFFSET) | (LOC_Fraction & USART_FIRST_BYTE_MASK);
         LOC_CR1Value = USART_PERI_ENABLE | USART_CfgArr.WordLength | USART_CfgArr.OverSampling;
-        LOC_CR1Value |= USART_CfgArr.ParityControl | USART_CfgArr.ParitySelect;
+        LOC_CR1Value |= USART_CfgArr.ParityControl | USART_CfgArr.ParitySelect | USART_RX_ENABLE_FLAG | USART_TX_ENABLE_FLAG;
         LOC_CR2Value = USART_CfgArr.StopBits;
 
-        ((USART_Peri_t *)USART_ADD[USART_CfgArr.address])->BRR = LOC_BRRValue;
-        ((USART_Peri_t *)USART_ADD[USART_CfgArr.address])->CR1 = LOC_CR1Value;
-        ((USART_Peri_t *)USART_ADD[USART_CfgArr.address])->CR2 = LOC_CR2Value;
+        (USART_ADD[USART_CfgArr.address])->BRR = LOC_BRRValue;
+        (USART_ADD[USART_CfgArr.address])->CR1 = LOC_CR1Value;
+        (USART_ADD[USART_CfgArr.address])->CR2 = LOC_CR2Value;
     }
 
     return LOC_Status;
@@ -166,21 +166,13 @@ Error_Status USART_SendByte(USART_Req_t USART_Req)
     {
         LOC_Status = Status_OK;
         TX_Request[USART_Req.USART_Peri].state = USART_REQ_STATE_BUSY;
-        ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->DR = *(USART_Req.buffer);
-        ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_TX_ENABLE_FLAG;
+        (USART_ADD[USART_Req.USART_Peri])->DR = *(USART_Req.buffer);
 
-        // while (!(((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->SR & USART_SYNC_TXE_FLAG) && TimeOut)
         while (TimeOut)
         {
             TimeOut--;
         }
 
-        /* if (!TimeOut)
-          {
-              LOC_Status = Status_USART_TimeOut;
-          }*/
-
-        ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 &= ~USART_TX_ENABLE_FLAG;
         TX_Request[USART_Req.USART_Peri].state = USART_REQ_STATE_READY;
     }
     return LOC_Status;
@@ -206,8 +198,7 @@ Error_Status USART_GetByte(USART_Req_t USART_Req)
     {
         LOC_Status = Status_OK;
         RX_Request[USART_Req.USART_Peri].state = USART_REQ_STATE_BUSY;
-        ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_RX_ENABLE_FLAG;
-        while (!(((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->SR & USART_SYNC_RXNE_FLAG) && TimeOut)
+        while (!((USART_ADD[USART_Req.USART_Peri])->SR & USART_SYNC_RXNE_FLAG) && TimeOut)
         {
             TimeOut--;
         }
@@ -218,10 +209,9 @@ Error_Status USART_GetByte(USART_Req_t USART_Req)
         }
         else
         {
-            *(USART_Req.buffer) = ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->DR;
+            *(USART_Req.buffer) = (USART_ADD[USART_Req.USART_Peri])->DR;
         }
 
-        ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 &= ~USART_RX_ENABLE_FLAG;
         RX_Request[USART_Req.USART_Peri].state = USART_REQ_STATE_BUSY;
     }
     return LOC_Status;
@@ -252,10 +242,9 @@ Error_Status USART_TXBufferAsyncZC(USART_Req_t USART_Req)
         TX_Request[USART_Req.USART_Peri].CallBack = USART_Req.CB;
         TX_Request[USART_Req.USART_Peri].state = USART_REQ_STATE_BUSY;
 
-        ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_TX_ENABLE_FLAG;
-        ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->DR = TX_Request[USART_Req.USART_Peri].buffer.data[0];
+        (USART_ADD[USART_Req.USART_Peri])->DR = TX_Request[USART_Req.USART_Peri].buffer.data[0];
         TX_Request[USART_Req.USART_Peri].buffer.pos++;
-        ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_TXEIE_ENABLE_FLAG;
+        (USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_TXEIE_ENABLE_FLAG;
     }
 
     return LOC_Status;
@@ -263,13 +252,14 @@ Error_Status USART_TXBufferAsyncZC(USART_Req_t USART_Req)
 
 Error_Status USART_RXBufferAsyncZC(USART_Req_t USART_Req)
 {
+
     Error_Status LOC_Status = Status_NOK;
 
     if (USART_Req.buffer == NULL)
     {
         LOC_Status = Status_Null_Pointer;
     }
-    else if (TX_Request[USART_Req.USART_Peri].state == USART_REQ_STATE_BUSY)
+    else if (RX_Request[USART_Req.USART_Peri].state == USART_REQ_STATE_BUSY)
     {
         LOC_Status = Status_USART_Busy_Buffer;
     }
@@ -285,8 +275,8 @@ Error_Status USART_RXBufferAsyncZC(USART_Req_t USART_Req)
         RX_Request[USART_Req.USART_Peri].CallBack = USART_Req.CB;
         RX_Request[USART_Req.USART_Peri].state = USART_REQ_STATE_BUSY;
 
-        ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_RX_ENABLE_FLAG;
-        ((USART_Peri_t *)USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_RXNEIE_ENABLE_FLAG;
+        (USART_ADD[USART_Req.USART_Peri])->SR &= ~USART_RX_DONE_IRQ;
+        (USART_ADD[USART_Req.USART_Peri])->CR1 |= USART_RXNEIE_ENABLE_FLAG;
     }
     return LOC_Status;
 }
@@ -309,7 +299,7 @@ Error_Status USART_LIN_Init(USART_LIN_cfg_t USART_LIN_CfgArr)
         LOC_Status = Status_OK;
         LOC_CR2Value = USART_LIN_CfgArr.LIN_Mode | USART_LIN_CfgArr.LIN_IRQ | USART_LIN_CfgArr.LIN_BreakLength;
 
-        ((USART_Peri_t *)USART_ADD[USART_LIN_CfgArr.USART_Peri])->CR2 = LOC_CR2Value;
+        (USART_ADD[USART_LIN_CfgArr.USART_Peri])->CR2 = LOC_CR2Value;
     }
 
     return LOC_Status;
@@ -326,9 +316,9 @@ Error_Status USART_GenerateBreak(u8_t USART_Peri)
     else
     {
         LOC_Status = Status_OK;
-        /*enable break detection?*/
-        ((USART_Peri_t *)USART_ADD[USART_Peri])->CR1 |= USART_SEND_BREAK_MASK;
+        (USART_ADD[USART_Peri])->CR1 |= USART_SEND_BREAK_MASK;
     }
+
     return LOC_Status;
 }
 
@@ -355,25 +345,26 @@ Error_Status USART_Set_BreakCallBack(u8_t USART_Peri, CallBack_t CB)
 
 void USART1_IRQHandler(void)
 {
-    if (((USART_Peri_t *)USART_ADD[USART_Peri_1])->SR & USART_LBD_FLAG)
+    if ((USART_ADD[USART_Peri_1])->SR & USART_LBD_FLAG)
     {
         if (BreakCallBack[USART_Peri_1])
         {
+            (USART_ADD[USART_Peri_1])->SR &= ~USART_LBD_FLAG;
             BreakCallBack[USART_Peri_1]();
         }
     }
 
-    if (((USART_Peri_t *)USART_ADD[USART_Peri_1])->SR & USART_RX_DONE_IRQ && (RX_Request[USART_Peri_1].state == USART_REQ_STATE_BUSY))
+    if ((USART_ADD[USART_Peri_1])->SR & USART_RX_DONE_IRQ && (RX_Request[USART_Peri_1].state == USART_REQ_STATE_BUSY))
     {
         if (RX_Request[USART_Peri_1].buffer.pos < RX_Request[USART_Peri_1].buffer.size)
         {
-            RX_Request[USART_Peri_1].buffer.data[RX_Request[USART_Peri_1].buffer.pos] = ((USART_Peri_t *)USART_ADD[USART_Peri_1])->DR;
+            RX_Request[USART_Peri_1].buffer.data[RX_Request[USART_Peri_1].buffer.pos] = (USART_ADD[USART_Peri_1])->DR;
             RX_Request[USART_Peri_1].buffer.pos++;
         }
-        else
+
+        if (RX_Request[USART_Peri_1].buffer.pos == RX_Request[USART_Peri_1].buffer.size)
         {
-            ((USART_Peri_t *)USART_ADD[USART_Peri_1])->CR1 &= ~USART_RXNEIE_ENABLE_FLAG;
-            ((USART_Peri_t *)USART_ADD[USART_Peri_1])->CR1 &= ~USART_RX_ENABLE_FLAG;
+            (USART_ADD[USART_Peri_1])->CR1 &= ~USART_RXNEIE_ENABLE_FLAG;
             RX_Request[USART_Peri_1].state = USART_REQ_STATE_READY;
             if (RX_Request[USART_Peri_1].CallBack)
             {
@@ -382,18 +373,18 @@ void USART1_IRQHandler(void)
         }
     }
     /*adding the second condition to ensure the tx is not executed when the receive event happens*/
-    if (((USART_Peri_t *)USART_ADD[USART_Peri_1])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_1].state == USART_REQ_STATE_BUSY))
+    if ((USART_ADD[USART_Peri_1])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_1].state == USART_REQ_STATE_BUSY))
     {
         if (TX_Request[USART_Peri_1].buffer.pos < TX_Request[USART_Peri_1].buffer.size)
         {
-            ((USART_Peri_t *)USART_ADD[USART_Peri_1])->DR = TX_Request[USART_Peri_1].buffer.data[TX_Request[USART_Peri_1].buffer.pos];
+            (USART_ADD[USART_Peri_1])->DR = TX_Request[USART_Peri_1].buffer.data[TX_Request[USART_Peri_1].buffer.pos];
             TX_Request[USART_Peri_1].buffer.pos++;
         }
-        else
+        if (TX_Request[USART_Peri_1].buffer.pos == TX_Request[USART_Peri_1].buffer.size)
         {
-            ((USART_Peri_t *)USART_ADD[USART_Peri_1])->CR1 &= ~USART_TXEIE_ENABLE_FLAG;
-            ((USART_Peri_t *)USART_ADD[USART_Peri_1])->CR1 &= ~USART_TX_ENABLE_FLAG;
+            (USART_ADD[USART_Peri_1])->CR1 &= ~USART_TXEIE_ENABLE_FLAG;
             TX_Request[USART_Peri_1].state = USART_REQ_STATE_READY;
+
             if (TX_Request[USART_Peri_1].CallBack)
             {
                 TX_Request[USART_Peri_1].CallBack();
@@ -404,25 +395,25 @@ void USART1_IRQHandler(void)
 
 void USART2_IRQHandler(void)
 {
-    if (((USART_Peri_t *)USART_ADD[USART_Peri_2])->SR & USART_LBD_FLAG)
+    if ((USART_ADD[USART_Peri_2])->SR & USART_LBD_FLAG)
     {
         if (BreakCallBack[USART_Peri_2])
         {
+            (USART_ADD[USART_Peri_2])->SR &= ~USART_LBD_FLAG;
             BreakCallBack[USART_Peri_2]();
         }
     }
 
-    if (((USART_Peri_t *)USART_ADD[USART_Peri_2])->SR & USART_RX_DONE_IRQ && (RX_Request[USART_Peri_2].state == USART_REQ_STATE_BUSY))
+    if ((USART_ADD[USART_Peri_2])->SR & USART_RX_DONE_IRQ && (RX_Request[USART_Peri_2].state == USART_REQ_STATE_BUSY))
     {
         if (RX_Request[USART_Peri_2].buffer.pos < RX_Request[USART_Peri_2].buffer.size)
         {
-            RX_Request[USART_Peri_2].buffer.data[RX_Request[USART_Peri_2].buffer.pos] = ((USART_Peri_t *)USART_ADD[USART_Peri_2])->DR;
+            RX_Request[USART_Peri_2].buffer.data[RX_Request[USART_Peri_2].buffer.pos] = (USART_ADD[USART_Peri_2])->DR;
             RX_Request[USART_Peri_2].buffer.pos++;
         }
-        else
+        if (RX_Request[USART_Peri_2].buffer.pos == RX_Request[USART_Peri_2].buffer.size)
         {
-            ((USART_Peri_t *)USART_ADD[USART_Peri_2])->CR1 &= ~USART_RXNEIE_ENABLE_FLAG;
-            ((USART_Peri_t *)USART_ADD[USART_Peri_2])->CR1 &= ~USART_RX_ENABLE_FLAG;
+            (USART_ADD[USART_Peri_2])->CR1 &= ~USART_RXNEIE_ENABLE_FLAG;
             RX_Request[USART_Peri_2].state = USART_REQ_STATE_READY;
             if (RX_Request[USART_Peri_2].CallBack)
             {
@@ -431,17 +422,16 @@ void USART2_IRQHandler(void)
         }
     }
 
-    if (((USART_Peri_t *)USART_ADD[USART_Peri_2])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_2].state == USART_REQ_STATE_BUSY))
+    if ((USART_ADD[USART_Peri_2])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_2].state == USART_REQ_STATE_BUSY))
     {
         if (TX_Request[USART_Peri_2].buffer.pos < TX_Request[USART_Peri_2].buffer.size)
         {
-            ((USART_Peri_t *)USART_ADD[USART_Peri_2])->DR = TX_Request[USART_Peri_2].buffer.data[TX_Request[USART_Peri_2].buffer.pos];
+            (USART_ADD[USART_Peri_2])->DR = TX_Request[USART_Peri_2].buffer.data[TX_Request[USART_Peri_2].buffer.pos];
             TX_Request[USART_Peri_2].buffer.pos++;
         }
-        else
+        if (TX_Request[USART_Peri_2].buffer.pos == TX_Request[USART_Peri_2].buffer.size)
         {
-            ((USART_Peri_t *)USART_ADD[USART_Peri_2])->CR1 &= ~USART_TXEIE_ENABLE_FLAG;
-            ((USART_Peri_t *)USART_ADD[USART_Peri_2])->CR1 &= ~USART_TX_ENABLE_FLAG;
+            (USART_ADD[USART_Peri_2])->CR1 &= ~USART_TXEIE_ENABLE_FLAG;
             TX_Request[USART_Peri_2].state = USART_REQ_STATE_READY;
             if (TX_Request[USART_Peri_2].CallBack)
             {
@@ -453,25 +443,25 @@ void USART2_IRQHandler(void)
 
 void USART6_IRQHandler(void)
 {
-    if (((USART_Peri_t *)USART_ADD[USART_Peri_6])->SR & USART_LBD_FLAG)
+    if ((USART_ADD[USART_Peri_6])->SR & USART_LBD_FLAG)
     {
         if (BreakCallBack[USART_Peri_6])
         {
+            (USART_ADD[USART_Peri_6])->SR &= ~USART_LBD_FLAG;
             BreakCallBack[USART_Peri_6]();
         }
     }
 
-    if (((USART_Peri_t *)USART_ADD[USART_Peri_6])->SR & USART_RX_DONE_IRQ && (TX_Request[USART_Peri_6].state == USART_REQ_STATE_BUSY))
+    if ((USART_ADD[USART_Peri_6])->SR & USART_RX_DONE_IRQ && (TX_Request[USART_Peri_6].state == USART_REQ_STATE_BUSY))
     {
         if (RX_Request[USART_Peri_6].buffer.pos < RX_Request[USART_Peri_6].buffer.size)
         {
-            RX_Request[USART_Peri_6].buffer.data[RX_Request[USART_Peri_6].buffer.pos] = ((USART_Peri_t *)USART_ADD[USART_Peri_6])->DR;
+            RX_Request[USART_Peri_6].buffer.data[RX_Request[USART_Peri_6].buffer.pos] = (USART_ADD[USART_Peri_6])->DR;
             RX_Request[USART_Peri_6].buffer.pos++;
         }
-        else
+        if (RX_Request[USART_Peri_6].buffer.pos == RX_Request[USART_Peri_6].buffer.size)
         {
-            ((USART_Peri_t *)USART_ADD[USART_Peri_6])->CR1 &= ~USART_RXNEIE_ENABLE_FLAG;
-            ((USART_Peri_t *)USART_ADD[USART_Peri_6])->CR1 &= ~USART_RX_ENABLE_FLAG;
+            (USART_ADD[USART_Peri_6])->CR1 &= ~USART_RXNEIE_ENABLE_FLAG;
             RX_Request[USART_Peri_6].state = USART_REQ_STATE_READY;
             if (RX_Request[USART_Peri_6].CallBack)
             {
@@ -480,17 +470,16 @@ void USART6_IRQHandler(void)
         }
     }
 
-    if (((USART_Peri_t *)USART_ADD[USART_Peri_6])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_6].state == USART_REQ_STATE_BUSY))
+    if ((USART_ADD[USART_Peri_6])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_6].state == USART_REQ_STATE_BUSY))
     {
         if (TX_Request[USART_Peri_6].buffer.pos < TX_Request[USART_Peri_6].buffer.size)
         {
-            ((USART_Peri_t *)USART_ADD[USART_Peri_6])->DR = TX_Request[USART_Peri_6].buffer.data[TX_Request[USART_Peri_6].buffer.pos];
+            (USART_ADD[USART_Peri_6])->DR = TX_Request[USART_Peri_6].buffer.data[TX_Request[USART_Peri_6].buffer.pos];
             TX_Request[USART_Peri_6].buffer.pos++;
         }
-        else
+        if (TX_Request[USART_Peri_6].buffer.pos == TX_Request[USART_Peri_6].buffer.size)
         {
-            ((USART_Peri_t *)USART_ADD[USART_Peri_6])->CR1 &= ~USART_TXEIE_ENABLE_FLAG;
-            ((USART_Peri_t *)USART_ADD[USART_Peri_6])->CR1 &= ~USART_TX_ENABLE_FLAG;
+            (USART_ADD[USART_Peri_6])->CR1 &= ~USART_TXEIE_ENABLE_FLAG;
             TX_Request[USART_Peri_6].state = USART_REQ_STATE_READY;
             if (TX_Request[USART_Peri_6].CallBack)
             {
