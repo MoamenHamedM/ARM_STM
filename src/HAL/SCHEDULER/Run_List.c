@@ -10,4 +10,10 @@ const Runnable_t Run_List[_Run_Num] =
             .periodMs = 2,
             .delay_Ms = 30,
             .CB = LCD_Runnable},
-        [LCD_W] = {.name = "LCD Write", .periodMs = 1000, .delay_Ms = 500, .CB = LCD_Write}};
+        [LCD_W] = {.name = "LCD Write", .periodMs = 1000, .delay_Ms = 500, .CB = LCD_Write}
+        /* [LIN_MASTER] = {
+            .name = "LIN Master Task",
+            .periodMs = 100,
+            .delay_Ms = 300,
+            .CB = LIN_MasterTask} */
+};

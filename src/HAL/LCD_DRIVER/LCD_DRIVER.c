@@ -11,9 +11,10 @@
 #define LCD_USER_STATE_BUSY 1
 #define LCD_USER_STATE_READY 0
 #define LCD_REQ_TYPE_WRITE 0
-#define LCD_REQ_TYPE_CLEAR 1
-#define LCD_REQ_TYPE_SET_P 2
-#define LCD_MAX_BUFFER_SIZE 10
+#define LCD_REQ_TYPE_COMM 1
+#define LCD_REQ_TYPE_CLEAR 2
+#define LCD_REQ_TYPE_SET_P 3
+#define LCD_MAX_BUFFER_SIZE 100
 #define STATIC_STATE_BUSY 0
 #define STATIC_STATE_READY 1
 #define COMMAND_NIBBLE_HIGH 1
@@ -54,6 +55,11 @@ typedef struct
 
         struct
         {
+            u8_t U_command;
+        } Command_Req;
+
+        struct
+        {
             u8_t X_Position;
             u8_t Y_Position;
         } SetP_Req;
@@ -63,38 +69,7 @@ typedef struct
     u8_t U_Type;
     CallBack_t CallBack;
 } User_Req_t;
-/*
-typedef struct
-{
-    const u8_t *U_string;
-    u8_t U_length;
-    u8_t U_State;
-    u8_t U_Type;
-    u8_t X_Position;
-    u8_t Y_Position;
-    u8_t Curr_Pos;
-    CallBack_t CallBack;
-} User_Req_t;
-*/
-/*
-typedef struct
-{
-    u8_t Curr_Pos;
-    CallBack_t CallBack;
-} Write_Req_t;
 
-typedef struct
-{
-    CallBack_t CallBack;
-} Clear_Req_t;
-
-typedef struct
-{
-    u8_t X_Position;
-    u8_t Y_Position;
-    CallBack_t CallBack;
-} SetP_Req_t;
-*/
 /********************************************************************************************************/
 /************************************************Variables***********************************************/
 /********************************************************************************************************/
@@ -103,15 +78,14 @@ static u8_t LCD_State = LCD_STATE_OFF;
 static u8_t LCD_DigitCounter = 0;
 static User_Req_t User_Resquest[LCD_MAX_BUFFER_SIZE];
 static u8_t User_CurrentRequest = 0;
-// static Write_Req_t Write_Request;
-// static Clear_Req_t Clear_Request;
-// static SetP_Req_t SetP_Request;
+
 /********************************************************************************************************/
 /*****************************************Static Functions Prototype*************************************/
 /********************************************************************************************************/
 static void LCD_WriteToPins(u8_t Info, u8_t State);
 static void Init_State_Func();
 static void OperationState_WriteFunc();
+static void OperationState_CommandFunc();
 static void OperationState_ClearFunc();
 static void OperationState_SetPFunc();
 
@@ -167,6 +141,35 @@ Error_Status LCD_WriteStringAsync(u8_t *string, u8_t length, CallBack_t CB)
             User_Resquest[Index].Request.Write_Req.Curr_Pos = 0;
             User_Resquest[Index].CallBack = CB;
             User_Resquest[Index].U_Type = LCD_REQ_TYPE_WRITE;
+            User_Resquest[Index].U_State = LCD_USER_STATE_BUSY;
+
+            break;
+        }
+    }
+    if (Index == LCD_MAX_BUFFER_SIZE)
+    {
+        LOC_Status = Status_LCD_Full_Buffer;
+    }
+    else
+    {
+        LOC_Status = Status_OK;
+    }
+
+    return LOC_Status;
+}
+
+Error_Status LCD_WriteCommandAsync(u8_t Command, CallBack_t CB)
+{
+    u8_t Index;
+    Error_Status LOC_Status = Status_NOK;
+
+    for (Index = 0; Index < LCD_MAX_BUFFER_SIZE; Index++)
+    {
+        if (User_Resquest[Index].U_State == LCD_USER_STATE_READY)
+        {
+            User_Resquest[Index].Request.Command_Req.U_command = Command;
+            User_Resquest[Index].CallBack = CB;
+            User_Resquest[Index].U_Type = LCD_REQ_TYPE_COMM;
             User_Resquest[Index].U_State = LCD_USER_STATE_BUSY;
 
             break;
@@ -473,6 +476,7 @@ static void LCD_WriteToPins(u8_t Info, u8_t State)
 #if NUMBER_OF_DATA_LINES == DATA_8_PINS
 static void OperationState_WriteFunc()
 {
+    u8_t TempReqNum;
     static u8_t write_state = STATIC_STATE_READY;
 
     if (User_Resquest[User_CurrentRequest].Request.Write_Req.Curr_Pos < User_Resquest[User_CurrentRequest].Request.Write_Req.U_length)
@@ -498,6 +502,7 @@ static void OperationState_WriteFunc()
         User_Resquest[User_CurrentRequest].U_State = LCD_USER_STATE_READY;
         User_Resquest[User_CurrentRequest].Request.Write_Req.Curr_Pos = 0;
 
+        TempReqNum = User_CurrentRequest;
         User_CurrentRequest++;
         if (User_Resquest[User_CurrentRequest].U_State == LCD_USER_STATE_READY || User_CurrentRequest == LCD_MAX_BUFFER_SIZE)
         {
@@ -523,9 +528,9 @@ static void OperationState_WriteFunc()
         //       /*do nothing*/
         //   }
 
-        if (User_CurrentRequest && User_Resquest[User_CurrentRequest - 1].CallBack)
+        if (User_Resquest[TempReqNum].CallBack)
         {
-            User_Resquest[User_CurrentRequest - 1].CallBack();
+            User_Resquest[TempReqNum].CallBack();
         }
     }
 }
@@ -534,6 +539,7 @@ static void OperationState_WriteFunc()
 #if NUMBER_OF_DATA_LINES == DATA_4_PINS
 static void OperationState_WriteFunc()
 {
+    u8_t TempReqNum;
     static u8_t write_state = STATIC_STATE_READY;
     static u8_t CommandState = 0;
     if (User_Resquest[User_CurrentRequest].Request.Write_Req.Curr_Pos < User_Resquest[User_CurrentRequest].Request.Write_Req.U_length)
@@ -575,6 +581,7 @@ static void OperationState_WriteFunc()
         User_Resquest[User_CurrentRequest].U_State = LCD_USER_STATE_READY;
         User_Resquest[User_CurrentRequest].Request.Write_Req.Curr_Pos = 0;
 
+        TempReqNum = User_CurrentRequest;
         User_CurrentRequest++;
         if (User_Resquest[User_CurrentRequest].U_State == LCD_USER_STATE_READY || User_CurrentRequest == LCD_MAX_BUFFER_SIZE)
         {
@@ -600,11 +607,100 @@ static void OperationState_WriteFunc()
         //        /*do nothing*/
         //    }
 
-        if (User_CurrentRequest && User_Resquest[User_CurrentRequest - 1].CallBack)
+        if (User_Resquest[TempReqNum].CallBack)
         {
-            // GPIO_Set_PinValue(GPIO_PORT_A,GPIO_PIN_11,GPIO_STATE_SET);
-            User_Resquest[User_CurrentRequest - 1].CallBack();
+            User_Resquest[TempReqNum].CallBack();
         }
+    }
+}
+#endif
+
+#if NUMBER_OF_DATA_LINES == DATA_8_PINS
+static void OperationState_CommandFunc()
+{
+    u8_t TempReqNum;
+    static u8_t Write_state = STATIC_STATE_READY;
+
+    switch (Write_state)
+    {
+    case STATIC_STATE_READY:
+        LCD_WriteToPins(User_Resquest[User_CurrentRequest].Request.Command_Req.U_command, WRITE_COMMAND_STATE);
+        Write_state = STATIC_STATE_BUSY;
+        break;
+    case STATIC_STATE_BUSY:
+        LCD_WriteToPins(User_Resquest[User_CurrentRequest].Request.Command_Req.U_command, WRITE_COMMAND_STATE);
+        Write_state = STATIC_STATE_READY;
+
+        User_Resquest[User_CurrentRequest].U_State = LCD_USER_STATE_READY;
+        TempReqNum = User_CurrentRequest;
+        User_CurrentRequest++;
+
+        if (User_Resquest[User_CurrentRequest].U_State == LCD_USER_STATE_READY || User_CurrentRequest == LCD_MAX_BUFFER_SIZE)
+        {
+            User_CurrentRequest = 0;
+        }
+
+        if (User_Resquest[TempReqNum].CallBack)
+        {
+            User_Resquest[TempReqNum].CallBack();
+        }
+
+        break;
+
+    default:
+        break;
+    }
+}
+#endif
+
+#if NUMBER_OF_DATA_LINES == DATA_4_PINS
+static void OperationState_CommandFunc()
+{
+    u8_t TempReqNum;
+    static u8_t Write_state = STATIC_STATE_READY;
+    static u8_t CommandState = 0;
+    switch (Write_state)
+    {
+    case STATIC_STATE_READY:
+        LCD_WriteToPins(User_Resquest[User_CurrentRequest].Request.Command_Req.U_command, WRITE_COMMAND_STATE);
+        if (CommandState)
+        {
+            Write_state = STATIC_STATE_BUSY;
+            CommandState = 0;
+        }
+        else
+        {
+            CommandState++;
+        }
+        break;
+    case STATIC_STATE_BUSY:
+        LCD_WriteToPins(User_Resquest[User_CurrentRequest].Request.Command_Req.U_command, WRITE_COMMAND_STATE);
+        if (CommandState)
+        {
+            Write_state = STATIC_STATE_READY;
+            CommandState = 0;
+            User_Resquest[User_CurrentRequest].U_State = LCD_USER_STATE_READY;
+
+            TempReqNum = User_CurrentRequest;
+            User_CurrentRequest++;
+            if (User_Resquest[User_CurrentRequest].U_State == LCD_USER_STATE_READY || User_CurrentRequest == LCD_MAX_BUFFER_SIZE)
+            {
+                User_CurrentRequest = 0;
+            }
+
+            if (User_Resquest[TempReqNum].CallBack)
+            {
+                User_Resquest[TempReqNum].CallBack();
+            }
+        }
+        else
+        {
+            CommandState++;
+        }
+        break;
+
+    default:
+        break;
     }
 }
 #endif
@@ -612,6 +708,7 @@ static void OperationState_WriteFunc()
 #if NUMBER_OF_DATA_LINES == DATA_8_PINS
 static void OperationState_ClearFunc()
 {
+    u8_t TempReqNum;
     static u8_t Clear_state = STATIC_STATE_READY;
     u8_t LOC_DisplayClearCommand = LCD_8_PIN_COMMAND_CLEAR;
 
@@ -626,6 +723,7 @@ static void OperationState_ClearFunc()
         Clear_state = STATIC_STATE_READY;
         User_Resquest[User_CurrentRequest].U_State = LCD_USER_STATE_READY;
 
+        TempReqNum = User_CurrentRequest;
         User_CurrentRequest++;
         if (User_Resquest[User_CurrentRequest].U_State == LCD_USER_STATE_READY || User_CurrentRequest == LCD_MAX_BUFFER_SIZE)
         {
@@ -634,9 +732,9 @@ static void OperationState_ClearFunc()
 
         LCD_SetCursorPositionAsync(0, 0, NULL);
 
-        if (User_CurrentRequest && User_Resquest[User_CurrentRequest - 1].CallBack)
+        if (User_Resquest[TempReqNum].CallBack)
         {
-            User_Resquest[User_CurrentRequest - 1].CallBack();
+            User_Resquest[TempReqNum].CallBack();
         }
         break;
 
@@ -648,6 +746,7 @@ static void OperationState_ClearFunc()
 #if NUMBER_OF_DATA_LINES == DATA_4_PINS
 static void OperationState_ClearFunc()
 {
+    u8_t TempReqNum;
     static u8_t Clear_state = STATIC_STATE_READY;
     u8_t LOC_DisplayClearCommand = LCD_8_PIN_COMMAND_CLEAR;
     static u8_t CommandState = 0;
@@ -672,6 +771,7 @@ static void OperationState_ClearFunc()
             Clear_state = STATIC_STATE_READY;
             User_Resquest[User_CurrentRequest].U_State = LCD_USER_STATE_READY;
 
+            TempReqNum = User_CurrentRequest;
             User_CurrentRequest++;
             if (User_Resquest[User_CurrentRequest].U_State == LCD_USER_STATE_READY || User_CurrentRequest == LCD_MAX_BUFFER_SIZE)
             {
@@ -681,9 +781,9 @@ static void OperationState_ClearFunc()
 
             LCD_SetCursorPositionAsync(0, 0, NULL);
 
-            if (User_CurrentRequest && User_Resquest[User_CurrentRequest - 1].CallBack)
+            if (User_Resquest[TempReqNum].CallBack)
             {
-                User_Resquest[User_CurrentRequest - 1].CallBack();
+                User_Resquest[TempReqNum].CallBack();
             }
         }
         else
@@ -701,6 +801,7 @@ static void OperationState_ClearFunc()
 #if NUMBER_OF_DATA_LINES == DATA_8_PINS
 static void OperationState_SetPFunc()
 {
+    u8_t TempReqNum;
     static u8_t SetPState = STATIC_STATE_READY;
     u8_t LOC_Location = LCD_COMMAND_GOTOXY;
 
@@ -727,15 +828,16 @@ static void OperationState_SetPFunc()
         SetPState = STATIC_STATE_READY;
         User_Resquest[User_CurrentRequest].U_State = LCD_USER_STATE_READY;
 
+        TempReqNum = User_CurrentRequest;
         User_CurrentRequest++;
         if (User_Resquest[User_CurrentRequest].U_State == LCD_USER_STATE_READY || User_CurrentRequest == LCD_MAX_BUFFER_SIZE)
         {
             User_CurrentRequest = 0;
         }
 
-        if (User_CurrentRequest && User_Resquest[User_CurrentRequest - 1].CallBack)
+        if (User_Resquest[TempReqNum].CallBack)
         {
-            User_Resquest[User_CurrentRequest - 1].CallBack();
+            User_Resquest[TempReqNum].CallBack();
         }
         break;
 
@@ -749,6 +851,7 @@ static void OperationState_SetPFunc()
 #if NUMBER_OF_DATA_LINES == DATA_4_PINS
 static void OperationState_SetPFunc()
 {
+    u8_t TempReqNum;
     static u8_t SetPState = STATIC_STATE_READY;
     u8_t LOC_Location = LCD_COMMAND_GOTOXY;
     static u8_t CommandState = 0;
@@ -786,6 +889,7 @@ static void OperationState_SetPFunc()
             SetPState = STATIC_STATE_READY;
             User_Resquest[User_CurrentRequest].U_State = LCD_USER_STATE_READY;
 
+            TempReqNum = User_CurrentRequest;
             User_CurrentRequest++;
             if (User_Resquest[User_CurrentRequest].U_State == LCD_USER_STATE_READY || User_CurrentRequest == LCD_MAX_BUFFER_SIZE)
             {
@@ -793,9 +897,9 @@ static void OperationState_SetPFunc()
             }
             CommandState = 0;
 
-            if (User_CurrentRequest && User_Resquest[User_CurrentRequest - 1].CallBack)
+            if (User_Resquest[TempReqNum].CallBack)
             {
-                User_Resquest[User_CurrentRequest - 1].CallBack();
+                User_Resquest[TempReqNum].CallBack();
             }
         }
         else
@@ -847,6 +951,9 @@ void LCD_Runnable(void)
                 break;
             case LCD_REQ_TYPE_SET_P:
                 OperationState_SetPFunc();
+                break;
+            case LCD_REQ_TYPE_COMM:
+                OperationState_CommandFunc();
                 break;
 
             default:

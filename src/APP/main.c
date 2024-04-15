@@ -10,6 +10,9 @@
 #include "HAL/LCD_DRIVER.h"
 #include "MCAL/USART_DRIVER.h"
 #include "MCAL/DMA_DRIVER.h"
+#include "HAL/LIN_Types.h"
+#include "HAL/LIN_MASTER/LIN_Master.h"
+#include "HAL/LIN_SLAVE/LIN_SLave.h"
 
 #define TEST_RCC 0
 #define TEST_GPIO 1
@@ -20,6 +23,7 @@
 #define TEST_LCD 6
 #define TEST_USART 7
 #define TEST_DMA 8
+#define TEST_LIN 9
 #define APP TEST_LCD
 
 // ----- main() ---------------------------------------------------------------
@@ -34,6 +38,7 @@
 void Runnable_LED_Toggle(void);
 void LCD_Write();
 void Led_On_off();
+u8_t buffer[5];
 
 #if APP == TEST_NVIC
 void delay_ms(u32_t ms)
@@ -96,7 +101,7 @@ int main(int argc, char *argv[])
   RCC_CTRL_Peripheral_Enable(RCC_PERI_AHB1_GPIOA);
 
   GPIO_Pin_t Led = {.Pin = GPIO_PIN_1, .Port = GPIO_PORT_A, .Mode = GPIO_MODE_OP_PP_PU, .Speed = GPIO_SPEED_MED};
-  GPIO_Init(&Led);
+  GPIO_Init(&Led, 1);
 
   GPIO_Set_PinValue(Led.Port, Led.Pin, GPIO_STATE_SET);
   GPIO_Set_PinValue(Led.Port, Led.Pin, GPIO_STATE_RESET);
@@ -208,10 +213,10 @@ int main(int argc, char *argv[])
           .OverSampling = USART_OVERSAMPLING_16};
 
   u8_t kk = 'a';
-  u8_t aa[10] = "ABCDE12345";
+  u8_t aa[5] = "asdfg";
 
-  USART_Req_t USARAT_Byte = {.length = 1, .buffer = &kk, .USART_Peri = USART_Peri_1, .CB = Led_On_off};
-  USART_Req_t USARAT_Bytes = {.length = 10, .buffer = aa, .USART_Peri = USART_Peri_1, .CB = NULL};
+  USART_Req_t USARAT_Byte = {.length = 5, .buffer = aa, .USART_Peri = USART_Peri_1, .CB = NULL};
+  USART_Req_t USARAT_Bytes = {.length = 5, .buffer = buffer, .USART_Peri = USART_Peri_1, .CB = LCD_Write};
 
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOB);
@@ -220,14 +225,19 @@ int main(int argc, char *argv[])
   USART_Init(USART_CFG);
   GPIO_Init(USART_Pins, 2);
   LED_Init();
+  LCD_Init();
+
   GPIO_CFG_AlternateFunction(USART_Pins[0].Port, USART_Pins[0].Pin, GPIO_FUNC_AF7);
   GPIO_CFG_AlternateFunction(USART_Pins[1].Port, USART_Pins[1].Pin, GPIO_FUNC_AF7);
-  USART_SendByte(USARAT_Byte);
-  // USART_TXBufferAsyncZC(USARAT_Byte);
-  USART_TXBufferAsyncZC(USARAT_Bytes);
-  // USART_RXBufferAsyncZC(USARAT_Byte);
-  while (1)
-    ;
+  /* USART_SendByte(USARAT_Byte);
+  USART_TXBufferAsyncZC(USARAT_Byte);
+  USART_TXBufferAsyncZC(USARAT_Byte); */
+  USART_TXBufferAsyncZC(USARAT_Byte);
+  USART_RXBufferAsyncZC(USARAT_Bytes);
+  USART_TXBufferAsyncZC(USARAT_Byte);
+
+  SCH_CFG_SchedulerInit();
+  SCH_CTRL_StartScheduler();
 #endif
 
 #if APP == TEST_DMA
@@ -245,6 +255,27 @@ int main(int argc, char *argv[])
 
 #endif
 
+#if APP == TEST_LIN
+
+  LIN_Pin_cfg_t LIN_Pins[4] = {[0] = {.Port = GPIO_PORT_A, .Pin = GPIO_PIN_9}, [1] = {.Port = GPIO_PORT_A, .Pin = GPIO_PIN_10}, [2] = {.Port = GPIO_PORT_A, .Pin = GPIO_PIN_2}, [3] = {.Port = GPIO_PORT_A, .Pin = GPIO_PIN_3}};
+
+  LIN_cfg_t LIN_Arr1 = {.TX_Pin = LIN_Pins[0], .RX_Pin = LIN_Pins[1], .address = USART_Peri_1, .BaudRate = 9600, .WordLength = USART_WORD_LENGTH_8, .ParityControl = USART_PARITY_DISABLE, .ParitySelect = USART_PARITY_DISABLE, .StopBits = USART_STOP_BITS_1, .OverSampling = USART_OVERSAMPLING_16, .LIN_Mode = USART_LIN_MODE_ENABLE, .LIN_IRQ = USART_LIN_IRQ_DISABLE, .LIN_BreakLength = USART_LIN_BRK_LENGTH_10};
+
+  LIN_cfg_t LIN_Arr2 = {.TX_Pin = LIN_Pins[2], .RX_Pin = LIN_Pins[3], .address = USART_Peri_2, .BaudRate = 9600, .WordLength = USART_WORD_LENGTH_8, .ParityControl = USART_PARITY_DISABLE, .ParitySelect = USART_PARITY_DISABLE, .StopBits = USART_STOP_BITS_1, .OverSampling = USART_OVERSAMPLING_16, .LIN_Mode = USART_LIN_MODE_ENABLE, .LIN_IRQ = USART_LIN_IRQ_ENABLE, .LIN_BreakLength = USART_LIN_BRK_LENGTH_10};
+
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_USART1);
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_USART2);
+
+  LIN_MasterInit(LIN_Arr1);
+  LIN_SlaveInit(LIN_Arr2);
+  LED_Init();
+
+  SCH_CFG_SchedulerInit();
+  SCH_CTRL_StartScheduler();
+
+#endif
+
   return 0;
 }
 
@@ -254,14 +285,52 @@ int main(int argc, char *argv[])
 
 void Led_On_off()
 {
-  // LED_SetState(LED_Toggle,LED_STATE_ON);
+  // LED_SetState(LED_Toggle, LED_STATE_ON);
   LED_ToggleLed(LED_Toggle);
 }
 
 void LCD_Write()
 {
-  LCD_WriteStringAsync("hello", 5, Led_On_off);
-  LCD_SetCursorPositionAsync(0, 10, NULL);
+
+  static u8_t state = 0;
+  // LCD_WriteStringAsync(buffer, 5, Led_On_off);
+
+  switch (state)
+  {
+  case 0:
+    LCD_WriteStringAsync((u8_t *)"hello", 5, Led_On_off);
+    state++;
+    break;
+  case 1:
+    LCD_WriteCommandAsync(LCD_COMM_CLEAR_DISPLAY, Led_On_off);
+    state++;
+    break;
+  case 2:
+    LCD_SetCursorPositionAsync(0, 10, NULL);
+    LCD_WriteStringAsync((u8_t *)"ahmed", 5, NULL);
+    state++;
+    break;
+  case 3:
+    LCD_WriteCommandAsync(LCD_COMM_BLINK_ON_CURSOR_ON, Led_On_off);
+    state++;
+    break;
+  case 4:
+    LCD_WriteCommandAsync(LCD_COMM_RETURN_HOME, NULL);
+    LCD_WriteStringAsync((u8_t *)"anas", 5, NULL);
+    LCD_WriteCommandAsync(LCD_COMM_BLINK_OFF_CURSOR_OFF, NULL);
+    state++;
+    break;
+  case 5:
+    LCD_WriteStringAsync((u8_t *)"samy", 5, NULL);
+    LCD_WriteCommandAsync(LCD_COMM_CURSOR_ON, NULL);
+    state = 0;
+    break;
+
+  default:
+    break;
+  }
+
+  /* LCD_SetCursorPositionAsync(0, 10, NULL);
 
   LCD_WriteStringAsync("ahmed", 5, NULL);
   LCD_SetCursorPositionAsync(0, 10, NULL);
@@ -274,5 +343,5 @@ void LCD_Write()
   LCD_WriteStringAsync("ahmed", 5, NULL);
   LCD_SetCursorPositionAsync(1, 8, NULL);
 
-  LCD_WriteStringAsync("nour", 5, NULL);
+  LCD_WriteStringAsync("nour", 5, NULL); */
 }

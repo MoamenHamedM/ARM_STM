@@ -50,6 +50,14 @@
 #define DIGIT_16 15
 #define DIGIT_24 23
 #define DIGIT_40 39
+
+/*Commands to send to control the LCD*/
+#define LCD_COMM_CLEAR_DISPLAY 0x1
+#define LCD_COMM_RETURN_HOME 0x2
+#define LCD_COMM_CURSOR_ON 0xE
+#define LCD_COMM_CURSOR_OFF 0xC
+#define LCD_COMM_BLINK_ON_CURSOR_ON 0xF
+#define LCD_COMM_BLINK_OFF_CURSOR_OFF 0xC
 /********************************************************************************************************/
 /************************************************Types***************************************************/
 /********************************************************************************************************/
@@ -90,6 +98,16 @@ Error_Status LCD_Init();
  * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input, Status_LCD_Full_Buffer
  */
 Error_Status LCD_WriteStringAsync(u8_t *string, u8_t length, CallBack_t CB);
+
+/*
+ * use this function to write a command to the lcd
+ * Parameters:
+ * Command -> address of the command to be written
+ * CB -> address of the function to be called after finishing - use NULL if no function is needed -
+ * return:
+ * Status_NOK, Status_OK, Status_Null_Pointer, Status_Invalid_Input, Status_LCD_Full_Buffer
+ */
+Error_Status LCD_WriteCommandAsync(u8_t Command, CallBack_t CB);
 
 /*
  * use this function to set the position of the lcd cursor
