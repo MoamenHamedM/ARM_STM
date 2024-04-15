@@ -380,7 +380,7 @@ void USART1_IRQHandler(void)
             (USART_ADD[USART_Peri_1])->DR = TX_Request[USART_Peri_1].buffer.data[TX_Request[USART_Peri_1].buffer.pos];
             TX_Request[USART_Peri_1].buffer.pos++;
         }
-        if (TX_Request[USART_Peri_1].buffer.pos == TX_Request[USART_Peri_1].buffer.size)
+        else
         {
             (USART_ADD[USART_Peri_1])->CR1 &= ~USART_TXEIE_ENABLE_FLAG;
             TX_Request[USART_Peri_1].state = USART_REQ_STATE_READY;
@@ -429,7 +429,7 @@ void USART2_IRQHandler(void)
             (USART_ADD[USART_Peri_2])->DR = TX_Request[USART_Peri_2].buffer.data[TX_Request[USART_Peri_2].buffer.pos];
             TX_Request[USART_Peri_2].buffer.pos++;
         }
-        if (TX_Request[USART_Peri_2].buffer.pos == TX_Request[USART_Peri_2].buffer.size)
+        else
         {
             (USART_ADD[USART_Peri_2])->CR1 &= ~USART_TXEIE_ENABLE_FLAG;
             TX_Request[USART_Peri_2].state = USART_REQ_STATE_READY;
@@ -477,7 +477,7 @@ void USART6_IRQHandler(void)
             (USART_ADD[USART_Peri_6])->DR = TX_Request[USART_Peri_6].buffer.data[TX_Request[USART_Peri_6].buffer.pos];
             TX_Request[USART_Peri_6].buffer.pos++;
         }
-        if (TX_Request[USART_Peri_6].buffer.pos == TX_Request[USART_Peri_6].buffer.size)
+        else
         {
             (USART_ADD[USART_Peri_6])->CR1 &= ~USART_TXEIE_ENABLE_FLAG;
             TX_Request[USART_Peri_6].state = USART_REQ_STATE_READY;
