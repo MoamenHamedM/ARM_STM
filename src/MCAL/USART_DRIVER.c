@@ -347,14 +347,14 @@ void USART1_IRQHandler(void)
 {
     if ((USART_ADD[USART_Peri_1])->SR & USART_LBD_FLAG)
     {
+        (USART_ADD[USART_Peri_1])->SR &= ~USART_LBD_FLAG;
         if (BreakCallBack[USART_Peri_1])
         {
-            (USART_ADD[USART_Peri_1])->SR &= ~USART_LBD_FLAG;
             BreakCallBack[USART_Peri_1]();
         }
     }
 
-    if ((USART_ADD[USART_Peri_1])->SR & USART_RX_DONE_IRQ && (RX_Request[USART_Peri_1].state == USART_REQ_STATE_BUSY))
+    if (((USART_ADD[USART_Peri_1])->SR & USART_RX_DONE_IRQ) && (RX_Request[USART_Peri_1].state == USART_REQ_STATE_BUSY))
     {
         if (RX_Request[USART_Peri_1].buffer.pos < RX_Request[USART_Peri_1].buffer.size)
         {
@@ -373,7 +373,7 @@ void USART1_IRQHandler(void)
         }
     }
     /*adding the second condition to ensure the tx is not executed when the receive event happens*/
-    if ((USART_ADD[USART_Peri_1])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_1].state == USART_REQ_STATE_BUSY))
+    if (((USART_ADD[USART_Peri_1])->SR & USART_TX_DONE_IRQ) && (TX_Request[USART_Peri_1].state == USART_REQ_STATE_BUSY))
     {
         if (TX_Request[USART_Peri_1].buffer.pos < TX_Request[USART_Peri_1].buffer.size)
         {
@@ -397,20 +397,21 @@ void USART2_IRQHandler(void)
 {
     if ((USART_ADD[USART_Peri_2])->SR & USART_LBD_FLAG)
     {
+        (USART_ADD[USART_Peri_2])->SR &= ~USART_LBD_FLAG;
         if (BreakCallBack[USART_Peri_2])
         {
-            (USART_ADD[USART_Peri_2])->SR &= ~USART_LBD_FLAG;
             BreakCallBack[USART_Peri_2]();
         }
     }
 
-    if ((USART_ADD[USART_Peri_2])->SR & USART_RX_DONE_IRQ && (RX_Request[USART_Peri_2].state == USART_REQ_STATE_BUSY))
+    if (((USART_ADD[USART_Peri_2])->SR & USART_RX_DONE_IRQ) && (RX_Request[USART_Peri_2].state == USART_REQ_STATE_BUSY))
     {
         if (RX_Request[USART_Peri_2].buffer.pos < RX_Request[USART_Peri_2].buffer.size)
         {
             RX_Request[USART_Peri_2].buffer.data[RX_Request[USART_Peri_2].buffer.pos] = (USART_ADD[USART_Peri_2])->DR;
             RX_Request[USART_Peri_2].buffer.pos++;
         }
+
         if (RX_Request[USART_Peri_2].buffer.pos == RX_Request[USART_Peri_2].buffer.size)
         {
             (USART_ADD[USART_Peri_2])->CR1 &= ~USART_RXNEIE_ENABLE_FLAG;
@@ -422,7 +423,7 @@ void USART2_IRQHandler(void)
         }
     }
 
-    if ((USART_ADD[USART_Peri_2])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_2].state == USART_REQ_STATE_BUSY))
+    if (((USART_ADD[USART_Peri_2])->SR & USART_TX_DONE_IRQ) && (TX_Request[USART_Peri_2].state == USART_REQ_STATE_BUSY))
     {
         if (TX_Request[USART_Peri_2].buffer.pos < TX_Request[USART_Peri_2].buffer.size)
         {
@@ -445,20 +446,21 @@ void USART6_IRQHandler(void)
 {
     if ((USART_ADD[USART_Peri_6])->SR & USART_LBD_FLAG)
     {
+        (USART_ADD[USART_Peri_6])->SR &= ~USART_LBD_FLAG;
         if (BreakCallBack[USART_Peri_6])
         {
-            (USART_ADD[USART_Peri_6])->SR &= ~USART_LBD_FLAG;
             BreakCallBack[USART_Peri_6]();
         }
     }
 
-    if ((USART_ADD[USART_Peri_6])->SR & USART_RX_DONE_IRQ && (TX_Request[USART_Peri_6].state == USART_REQ_STATE_BUSY))
+    if (((USART_ADD[USART_Peri_6])->SR & USART_RX_DONE_IRQ) && (TX_Request[USART_Peri_6].state == USART_REQ_STATE_BUSY))
     {
         if (RX_Request[USART_Peri_6].buffer.pos < RX_Request[USART_Peri_6].buffer.size)
         {
             RX_Request[USART_Peri_6].buffer.data[RX_Request[USART_Peri_6].buffer.pos] = (USART_ADD[USART_Peri_6])->DR;
             RX_Request[USART_Peri_6].buffer.pos++;
         }
+
         if (RX_Request[USART_Peri_6].buffer.pos == RX_Request[USART_Peri_6].buffer.size)
         {
             (USART_ADD[USART_Peri_6])->CR1 &= ~USART_RXNEIE_ENABLE_FLAG;
@@ -470,7 +472,7 @@ void USART6_IRQHandler(void)
         }
     }
 
-    if ((USART_ADD[USART_Peri_6])->SR & USART_TX_DONE_IRQ && (TX_Request[USART_Peri_6].state == USART_REQ_STATE_BUSY))
+    if (((USART_ADD[USART_Peri_6])->SR & USART_TX_DONE_IRQ) && (TX_Request[USART_Peri_6].state == USART_REQ_STATE_BUSY))
     {
         if (TX_Request[USART_Peri_6].buffer.pos < TX_Request[USART_Peri_6].buffer.size)
         {
