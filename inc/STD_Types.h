@@ -20,7 +20,11 @@ typedef enum
     Status_USART_TimeOut,
     Status_USART_Busy_Buffer,
     Status_LIN_OUT_SYNC,
-    Status_LIN_WRONG_CHK_SUM
+    Status_LIN_WRONG_CHK_SUM,
+    Status_FLSH_UNLOCK_FAIL,
+    Status_FLSH_LOCK_FAIL,
+    Status_FLSH_BSY,
+    Status_FLSH_CR_LOCK
 } Error_Status;
 
 typedef signed char s8_t;
