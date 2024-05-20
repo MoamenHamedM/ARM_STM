@@ -75,7 +75,7 @@ typedef struct
 /********************************************************************************************************/
 extern LCD_cfg_t LCDs_PinCfg;
 static u8_t LCD_State = LCD_STATE_OFF;
-static u8_t LCD_DigitCounter = 0;
+// static u8_t LCD_DigitCounter = 0;
 static User_Req_t User_Resquest[LCD_MAX_BUFFER_SIZE];
 static u8_t User_CurrentRequest = 0;
 
