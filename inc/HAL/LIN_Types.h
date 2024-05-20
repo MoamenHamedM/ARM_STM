@@ -61,10 +61,10 @@ typedef struct LIN_Message_t
 typedef struct
 {
     LIN_Message_t *Message;
-    u8_t TimeSlotMs;
+    u16_t TimeSlotMs;
 } LIN_SchedTableEntry_t;
 
-typedef u8_t Message0_Data_t[2];
-typedef u8_t Message1_Data_t[2];
+typedef u8_t Message_8_Byte_Data_t[8];
+typedef u8_t Message_5_Byte_Data_t[5];
 
 #endif
