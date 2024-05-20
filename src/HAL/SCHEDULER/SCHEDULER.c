@@ -39,6 +39,7 @@ Error_Status SCH_CTRL_StartScheduler()
 
     while (1)
     {
+
         if (PendingTicks)
         {
             PendingTicks--;

@@ -12,7 +12,9 @@
 #include "MCAL/DMA_DRIVER.h"
 #include "HAL/LIN_Types.h"
 #include "HAL/LIN_MASTER/LIN_Master.h"
+#include "HAL/LIN_MASTER/LIN_Master_config.h"
 #include "HAL/LIN_SLAVE/LIN_SLave.h"
+#include "HAL/LIN_SLAVE/LIN_Slave_config.h"
 
 #define TEST_RCC 0
 #define TEST_GPIO 1
@@ -24,7 +26,8 @@
 #define TEST_USART 7
 #define TEST_DMA 8
 #define TEST_LIN 9
-#define APP TEST_LCD
+#define TEST_BENCH 10
+#define APP TEST_BENCH
 
 // ----- main() ---------------------------------------------------------------
 
@@ -39,6 +42,11 @@ void Runnable_LED_Toggle(void);
 void LCD_Write();
 void Led_On_off();
 u8_t buffer[5];
+
+extern LIN_Message_t Master_Messages[_MASTER_MSG_NUM];
+extern LIN_Message_t Slave1_Messages[_SLAVE1_MSG_NUM];
+u8_t master_Send[2] = "MM";
+u8_t master_Recieve[2] = "PP";
 
 #if APP == TEST_NVIC
 void delay_ms(u32_t ms)
@@ -227,8 +235,8 @@ int main(int argc, char *argv[])
   LED_Init();
   LCD_Init();
 
-  GPIO_CFG_AlternateFunction(USART_Pins[0].Port, USART_Pins[0].Pin, GPIO_FUNC_AF7);
-  GPIO_CFG_AlternateFunction(USART_Pins[1].Port, USART_Pins[1].Pin, GPIO_FUNC_AF7);
+  // GPIO_CFG_AlternateFunction(USART_Pins[0].Port, USART_Pins[0].Pin, GPIO_FUNC_AF7);
+  // GPIO_CFG_AlternateFunction(USART_Pins[1].Port, USART_Pins[1].Pin, GPIO_FUNC_AF7);
   /* USART_SendByte(USARAT_Byte);
   USART_TXBufferAsyncZC(USARAT_Byte);
   USART_TXBufferAsyncZC(USARAT_Byte); */
@@ -257,19 +265,55 @@ int main(int argc, char *argv[])
 
 #if APP == TEST_LIN
 
-  LIN_Pin_cfg_t LIN_Pins[4] = {[0] = {.Port = GPIO_PORT_A, .Pin = GPIO_PIN_9}, [1] = {.Port = GPIO_PORT_A, .Pin = GPIO_PIN_10}, [2] = {.Port = GPIO_PORT_A, .Pin = GPIO_PIN_2}, [3] = {.Port = GPIO_PORT_A, .Pin = GPIO_PIN_3}};
+  LIN_Pin_cfg_t LIN_Pins[4] = {[0] = {.Port = GPIO_PORT_B, .Pin = GPIO_PIN_6}, [1] = {.Port = GPIO_PORT_B, .Pin = GPIO_PIN_7}, [2] = {.Port = GPIO_PORT_A, .Pin = GPIO_PIN_2}, [3] = {.Port = GPIO_PORT_A, .Pin = GPIO_PIN_3}};
 
-  LIN_cfg_t LIN_Arr1 = {.TX_Pin = LIN_Pins[0], .RX_Pin = LIN_Pins[1], .address = USART_Peri_1, .BaudRate = 9600, .WordLength = USART_WORD_LENGTH_8, .ParityControl = USART_PARITY_DISABLE, .ParitySelect = USART_PARITY_DISABLE, .StopBits = USART_STOP_BITS_1, .OverSampling = USART_OVERSAMPLING_16, .LIN_Mode = USART_LIN_MODE_ENABLE, .LIN_IRQ = USART_LIN_IRQ_DISABLE, .LIN_BreakLength = USART_LIN_BRK_LENGTH_10};
+  LIN_cfg_t LIN_Arr1 = {.TX_Pin = LIN_Pins[0], .RX_Pin = LIN_Pins[1], .address = USART_Peri_1, .BaudRate = 9600, .WordLength = USART_WORD_LENGTH_8, .ParityControl = USART_PARITY_DISABLE, .ParitySelect = USART_PARITY_DISABLE, .StopBits = USART_STOP_BITS_1, .OverSampling = USART_OVERSAMPLING_16, .LIN_Mode = USART_LIN_MODE_ENABLE, .LIN_IRQ = USART_LIN_IRQ_ENABLE, .LIN_BreakLength = USART_LIN_BRK_LENGTH_11};
 
-  LIN_cfg_t LIN_Arr2 = {.TX_Pin = LIN_Pins[2], .RX_Pin = LIN_Pins[3], .address = USART_Peri_2, .BaudRate = 9600, .WordLength = USART_WORD_LENGTH_8, .ParityControl = USART_PARITY_DISABLE, .ParitySelect = USART_PARITY_DISABLE, .StopBits = USART_STOP_BITS_1, .OverSampling = USART_OVERSAMPLING_16, .LIN_Mode = USART_LIN_MODE_ENABLE, .LIN_IRQ = USART_LIN_IRQ_ENABLE, .LIN_BreakLength = USART_LIN_BRK_LENGTH_10};
+  LIN_cfg_t LIN_Arr2 = {.TX_Pin = LIN_Pins[2], .RX_Pin = LIN_Pins[3], .address = USART_Peri_2, .BaudRate = 9600, .WordLength = USART_WORD_LENGTH_8, .ParityControl = USART_PARITY_DISABLE, .ParitySelect = USART_PARITY_DISABLE, .StopBits = USART_STOP_BITS_1, .OverSampling = USART_OVERSAMPLING_16, .LIN_Mode = USART_LIN_MODE_ENABLE, .LIN_IRQ = USART_LIN_IRQ_ENABLE, .LIN_BreakLength = USART_LIN_BRK_LENGTH_11};
 
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOB);
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_USART1);
   CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_USART2);
 
+  /* LIN_Assign_DatatoMSGSignal(&Master_Messages[1], master_Send, 2);
+  LIN_Assign_DatatoMSGSignal(&Master_Messages[0], master_Recieve, 2);
+  LIN_Assign_DatatoMSGSignal(&Slave1_Messages[0], master_Send, 2);
+  LIN_Assign_DatatoMSGSignal(&Slave1_Messages[1], master_Recieve, 2);
+ */
   LIN_MasterInit(LIN_Arr1);
   LIN_SlaveInit(LIN_Arr2);
   LED_Init();
+
+  SCH_CFG_SchedulerInit();
+  SCH_CTRL_StartScheduler();
+
+#endif
+
+#if APP == TEST_BENCH
+  GPIO_Pin_t USART_Pins[2] = {[0] = {.Pin = GPIO_PIN_6, .Port = GPIO_PORT_B, .Mode = GPIO_MODE_AF_PP, .Speed = GPIO_SPEED_VHIGH},
+                              [1] = {.Pin = GPIO_PIN_7, .Port = GPIO_PORT_B, .Mode = GPIO_MODE_AF_PP, .Speed = GPIO_SPEED_VHIGH}};
+  USART_cfg_t USART_CFG =
+      {
+          .address = USART_Peri_1,
+          .BaudRate = 9600,
+          .WordLength = USART_WORD_LENGTH_8,
+          .ParityControl = USART_PARITY_DISABLE,
+          .ParitySelect = USART_PARITY_DISABLE,
+          .StopBits = USART_STOP_BITS_1,
+          .OverSampling = USART_OVERSAMPLING_16};
+
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOA);
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOB);
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_GPIOC);
+  CLK_HAND_CTRL_PeriClockEnable(CLK_HAND_PERI_USART1);
+
+  NVIC_CTRL_EnableIRQ(NVIC_IRQ_USART1);
+  USART_Init(USART_CFG);
+  GPIO_Init(USART_Pins, 2);
+
+  GPIO_CFG_AlternateFunction(USART_Pins[0].Port, USART_Pins[0].Pin, GPIO_FUNC_AF7);
+  GPIO_CFG_AlternateFunction(USART_Pins[1].Port, USART_Pins[1].Pin, GPIO_FUNC_AF7);
 
   SCH_CFG_SchedulerInit();
   SCH_CTRL_StartScheduler();
